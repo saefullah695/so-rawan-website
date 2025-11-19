@@ -1,1 +1,30 @@
-
+{
+  "name": "so-rawan-website",
+  "version": "1.0.0",
+  "description": "Professional SO Rawan Management System for Cloudflare Pages",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev public --binding GS_CLIENT_EMAIL=your_email --binding GS_PRIVATE_KEY=your_key --binding SPREADSHEET_ID=your_id",
+    "deploy": "wrangler pages deploy public",
+    "build": "echo 'No build step needed for static site'"
+  },
+  "dependencies": {
+    "googleapis": "^126.0.1",
+    "google-auth-library": "^9.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "so-rawan",
+    "stock-opname",
+    "cloudflare",
+    "google-sheets",
+    "inventory"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
