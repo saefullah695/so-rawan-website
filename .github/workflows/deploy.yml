@@ -2,9 +2,7 @@ name: Deploy to Cloudflare Pages
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -12,19 +10,10 @@ jobs:
     permissions:
       contents: read
       deployments: write
-    name: Deploy to Cloudflare Pages
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
@@ -34,6 +23,3 @@ jobs:
           projectName: so-rawan-website
           directory: public
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          # Optional: Enable if you need to build
-          # buildCommand: npm run build
-          # buildOutputDirectory: public
