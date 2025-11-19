@@ -1,12 +1,19 @@
 name: Deploy to Cloudflare Pages
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Build
+        run: |
+          chmod +x build.sh
+          ./build.sh
+          
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@1
         with:
@@ -14,4 +21,3 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: 'so-rawan-website'
           directory: '.'
-          wranglerVersion: '3'
