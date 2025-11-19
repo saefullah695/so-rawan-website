@@ -1,73 +1,55 @@
-import { initializeSheets } from '../../utils/sheets.js';
+import { initializeSheets } from '../utils/sheets.js';
 
 export async function onRequestPost(context) {
-    const { request, env } = context;
-    
     try {
-        const data = await request.json();
+        const data = await context.request.json();
         const { nama, tanggal_rekap, shift, items } = data;
 
-        // Validation
         if (!nama || !tanggal_rekap || !shift || !items || items.length === 0) {
             return new Response(JSON.stringify({
                 success: false,
-                error: 'Data tidak lengkap: nama, tanggal, shift, dan items wajib diisi'
+                error: 'Data tidak lengkap'
             }), {
                 status: 400,
                 headers: getCorsHeaders()
             });
         }
 
-        const sheets = await initializeSheets(env);
-
-        // Prepare data for Google Sheets
+        const sheets = await initializeSheets(context.env);
         const timestamp = new Date().toISOString();
+
         const rows = items.map(item => [
-            generateUniqueId(nama, shift, tanggal_rekap, item.plu), // ID
-            timestamp,                                              // Timestamp
-            nama,                                                   // Nama Kasir
-            tanggal_rekap,                                          // Tanggal Rekap
-            shift,                                                  // Shift
-            item.plu,                                               // PLU
-            item.namaBarang,                                        // Nama Barang
-            item.oh.toString(),                                     // OH
-            item.fisik.toString(),                                  // Fisik
-            item.selisih.toString(),                                // Selisih
-            'Website',                                              // Pengirim
-            timestamp.split('T')[0]                                 // Date for sorting
+            generateUniqueId(nama, shift, tanggal_rekap, item.plu),
+            timestamp,
+            nama,
+            tanggal_rekap,
+            shift,
+            item.plu,
+            item.namaBarang,
+            item.oh.toString(),
+            item.fisik.toString(),
+            item.selisih.toString(),
+            'Website'
         ]);
 
-        // Append to SoRawan worksheet
-        const appendResponse = await sheets.api.spreadsheets.values.append({
+        await sheets.api.spreadsheets.values.append({
             spreadsheetId: sheets.spreadsheetId,
-            range: 'SoRawan!A:L',
+            range: 'SoRawan!A:K',
             valueInputOption: 'USER_ENTERED',
-            insertDataOption: 'INSERT_ROWS',
             requestBody: { values: rows }
         });
 
         return new Response(JSON.stringify({
             success: true,
-            message: `Data SO Rawan berhasil disimpan (${items.length} items)`,
-            details: {
-                kasir: nama,
-                tanggal: tanggal_rekap,
-                shift: shift,
-                totalItems: items.length,
-                updatedCells: appendResponse.data.updates?.updatedCells || 0,
-                timestamp: timestamp
-            }
+            message: `Data SO Rawan berhasil disimpan (${items.length} items)`
         }), {
             headers: getCorsHeaders()
         });
 
     } catch (error) {
-        console.error('Error saving SO Rawan data:', error);
-        
         return new Response(JSON.stringify({
             success: false,
-            error: 'Gagal menyimpan data: ' + error.message,
-            timestamp: new Date().toISOString()
+            error: error.message
         }), {
             status: 500,
             headers: getCorsHeaders()
@@ -75,7 +57,7 @@ export async function onRequestPost(context) {
     }
 }
 
-export async function onRequestOptions(context) {
+export async function onRequestOptions() {
     return new Response(null, {
         headers: getCorsHeaders()
     });
@@ -91,5 +73,5 @@ function getCorsHeaders() {
 }
 
 function generateUniqueId(...args) {
-    return args.join('-') + '-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    return args.join('-') + '-' + Date.now();
 }
