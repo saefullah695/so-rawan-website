@@ -1,8 +1,10 @@
 {
   "name": "so-rawan-website",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "build": "echo 'Static site - no build needed' && exit 0",
-    "deploy": "echo 'Deploying to Cloudflare Pages'"
-  }
+    "build": "echo 'Building static site...' && find . -name '*.html' -o -name '*.css' -o -name '*.js' | head -5 && echo 'Build complete!'",
+    "dev": "echo 'Development mode'"
+  },
+  "devDependencies": {}
 }
