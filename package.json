@@ -1,7 +1,16 @@
 {
-  "name": "so-rawan-website",
+  "name": "so-rawan-hilang",
   "version": "1.0.0",
+  "description": "Sistem Rekap SO Rawan Hilang",
+  "main": "public/index.html",
   "scripts": {
-    "build": "echo 'Static site build complete'"
+    "dev": "wrangler pages dev public --compatibility-date=2024-01-01",
+    "deploy": "wrangler pages deploy public"
+  },
+  "dependencies": {
+    "googleapis": "^126.0.1"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
   }
 }
