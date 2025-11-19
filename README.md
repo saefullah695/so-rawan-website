@@ -1,37 +1,51 @@
-# SO Rawan Website System
+# SO Rawan Website
 
 Professional Stock Opname Management System built for Cloudflare Pages.
 
 ## 🚀 Features
 
-- ✅ **Modern & Professional UI** - Beautiful, responsive design
-- ✅ **Real-time Data** - From Google Sheets (List_so & Absensi worksheets)
-- ✅ **Auto-complete Search** - Fast PLU and product name search
-- ✅ **Smart Calculations** - Automatic selisih calculation
-- ✅ **Data Validation** - Prevent duplicates and errors
-- ✅ **Real-time Statistics** - Live updates of stock status
-- ✅ **Mobile Responsive** - Works on all devices
-- ✅ **Fast Deployment** - Via Cloudflare Pages + GitHub Actions
+- ✅ Modern & Professional UI
+- ✅ Real-time Data from Google Sheets
+- ✅ Auto-complete Search
+- ✅ Smart Calculations
+- ✅ Data Validation
+- ✅ Real-time Statistics
+- ✅ Mobile Responsive
 
-## 📋 Prerequisites
+## 📋 Setup
 
-1. **Google Service Account** with access to:
-   - Google Sheets API
-   - Your spreadsheet containing:
-     - `List_so` worksheet (PLU, Nama Barang)
-     - `Absensi` worksheet (Nama Kasir data)
-     - `SoRawan` worksheet (for saving data)
+### 1. Create GitHub Repository
 
-2. **Cloudflare Account** with:
-   - Pages access
-   - API Token
+Create a new repository and upload all files.
 
-3. **GitHub Account** for repository and CI/CD
+### 2. Cloudflare Pages Setup
 
-## 🛠️ Setup Instructions
+1. Go to [Cloudflare Pages](https://dash.cloudflare.com/)
+2. Connect your GitHub repository
+3. Build settings:
+   - Build command: `npm run build`
+   - Build output directory: `public`
+4. Set environment variables:
+   - `GS_CLIENT_EMAIL`
+   - `GS_PRIVATE_KEY`
+   - `SPREADSHEET_ID`
 
-### 1. Clone & Setup Repository
+### 3. Google Sheets Setup
 
-```bash
-git clone https://github.com/your-username/so-rawan-website.git
-cd so-rawan-website
+Ensure your Google Sheets has:
+- `List_so` worksheet with columns: PLU, Nama Barang
+- `Absensi` worksheet with columns: NIK, NAMA, JABATAN
+- `SoRawan` worksheet for storing data
+
+## 🎯 Usage
+
+1. Select Kasir from dropdown
+2. Set Date & Shift
+3. Search Items by PLU or name
+4. Input OH & Fisik quantities
+5. Review Statistics in real-time
+6. Submit Data to save to Google Sheets
+
+## 📞 Support
+
+For issues, check Cloudflare Pages logs and verify environment variables.
