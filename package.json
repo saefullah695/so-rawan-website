@@ -1,15 +1,13 @@
 {
   "name": "so-rawan-website",
   "version": "1.0.0",
-  "description": "Professional SO Rawan System - Cloudflare Pages",
+  "description": "Professional SO Rawan System",
   "type": "module",
   "scripts": {
-    "dev": "npx pages dev public",
-    "build": "echo 'No build required for static site'"
+    "build": "echo 'No build required'"
   },
-  "dependencies": {},
-  "devDependencies": {},
-  "keywords": ["so-rawan", "stock-opname", "cloudflare-pages"],
-  "author": "Your Name",
-  "license": "MIT"
+  "dependencies": {
+    "googleapis": "^126.0.1",
+    "google-auth-library": "^9.0.0"
+  }
 }
