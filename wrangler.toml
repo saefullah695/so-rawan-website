@@ -1,0 +1,5 @@
+name = "so-rawan-hilang"
+compatibility_date = "2024-01-15"
+
+[env.production]
+# Environment variables akan di-set di Cloudflare Dashboard
