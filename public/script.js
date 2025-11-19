@@ -24,9 +24,6 @@ async function initializeApp() {
         // Setup event listeners
         setupEventListeners();
         
-        // Setup tab navigation
-        setupTabNavigation();
-        
         // Hide loading, show main content with animation
         setTimeout(() => {
             document.getElementById('loading').style.opacity = '0';
@@ -58,28 +55,6 @@ function updateCurrentTime() {
         now.toLocaleDateString('id-ID', options);
 }
 
-function setupTabNavigation() {
-    const navItems = document.querySelectorAll('.nav-item');
-    
-    navItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Remove active class from all items
-            navItems.forEach(nav => nav.classList.remove('active'));
-            
-            // Add active class to clicked item
-            this.classList.add('active');
-            
-            // Hide all tab contents
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected tab content
-            const tabId = this.getAttribute('data-tab') + 'Tab';
-            document.getElementById(tabId).classList.add('active');
-        });
-    });
-}
-
 async function loadListSoItems() {
     try {
         showAlert('info', 'Memuat data barang...', 'Mengambil dari database');
@@ -95,13 +70,13 @@ async function loadListSoItems() {
         if (result.success) {
             allListSoItems = result.data;
             updateSearchStats();
-            console.log('Loaded List_so items:', allListSoItems.length);
+            console.log('✅ Loaded List_so items:', allListSoItems.length);
         } else {
             throw new Error(result.error || 'Failed to load items');
         }
     } catch (error) {
-        console.error('Error loading List_so items:', error);
-        throw error;
+        console.error('❌ Error loading List_so items:', error);
+        showAlert('error', 'Gagal memuat data barang', error.message);
     }
 }
 
@@ -118,13 +93,13 @@ async function loadKasirItems() {
         if (result.success) {
             allKasirItems = result.data;
             populateKasirDropdown();
-            console.log('Loaded kasir items:', allKasirItems.length);
+            console.log('✅ Loaded kasir items:', allKasirItems.length);
         } else {
             throw new Error(result.error || 'Failed to load kasir data');
         }
     } catch (error) {
-        console.error('Error loading kasir items:', error);
-        throw error;
+        console.error('❌ Error loading kasir items:', error);
+        showAlert('error', 'Gagal memuat data kasir', error.message);
     }
 }
 
@@ -207,7 +182,7 @@ function handleSearch(event) {
     const filteredItems = allListSoItems.filter(item => 
         item.plu.toLowerCase().includes(searchTerm) || 
         item.namaBarang.toLowerCase().includes(searchTerm)
-    ).slice(0, 8); // Limit to 8 results
+    ).slice(0, 8);
     
     displaySearchResults(filteredItems, resultsContainer);
 }
@@ -241,7 +216,7 @@ function selectItem(plu, namaBarang) {
     document.getElementById('searchItem').value = '';
     document.getElementById('oh').focus();
     
-    // Add subtle animation to the input fields
+    // Add subtle animation
     const inputs = document.querySelectorAll('#plu, #namaBarang');
     inputs.forEach(input => {
         input.style.transform = 'scale(1.02)';
@@ -449,10 +424,7 @@ async function submitData() {
         if (result.success) {
             showAlert('success', 'Data tersimpan!', result.message || `Berhasil menyimpan ${items.length} barang`);
             
-            // Reset form with celebration
-            celebrateSuccess();
-            
-            // Reset data
+            // Reset form
             items = [];
             updatePreview();
             updateStats();
@@ -467,40 +439,6 @@ async function submitData() {
         console.error('Error:', error);
         showAlert('error', 'Koneksi error', 'Gagal terhubung ke server');
     }
-}
-
-function celebrateSuccess() {
-    // Add celebration animation to success button
-    const successBtn = document.querySelector('.btn-success');
-    successBtn.style.transform = 'scale(1.1)';
-    successBtn.style.background = 'var(--success-dark)';
-    
-    setTimeout(() => {
-        successBtn.style.transform = 'scale(1)';
-        successBtn.style.background = '';
-    }, 600);
-    
-    // Add confetti effect (simple CSS version)
-    const confetti = document.createElement('div');
-    confetti.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 1000;
-        background: radial-gradient(circle at 20% 50%, rgba(76, 201, 240, 0.3) 0%, transparent 50%),
-                   radial-gradient(circle at 80% 20%, rgba(67, 97, 238, 0.3) 0%, transparent 50%),
-                   radial-gradient(circle at 40% 80%, rgba(114, 9, 183, 0.3) 0%, transparent 50%);
-        animation: fadeOut 1s ease-in-out 1s forwards;
-    `;
-    
-    document.body.appendChild(confetti);
-    
-    setTimeout(() => {
-        document.body.removeChild(confetti);
-    }, 2000);
 }
 
 function showAlert(type, title, message) {
@@ -552,12 +490,3 @@ document.addEventListener('keydown', function(e) {
         document.getElementById('searchItem').value = '';
     }
 });
-
-// Add CSS for fadeOut animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeOut {
-        to { opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
