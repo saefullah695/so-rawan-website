@@ -1,14 +1,1 @@
-name = "so-rawan-website"
-compatibility_date = "2023-10-01"
-pages_build_output_dir = "public"
-
-[env.production]
-compatibility_date = "2023-10-01"
-
-# Environment variables will be set in Cloudflare Pages dashboard
-# GS_CLIENT_EMAIL = "your-service-account@your-project.iam.gserviceaccount.com"
-# GS_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
-# SPREADSHEET_ID = "your-spreadsheet-id-here"
-
-[env.development]
 compatibility_date = "2023-10-01"
