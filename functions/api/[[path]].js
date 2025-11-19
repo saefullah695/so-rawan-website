@@ -102,119 +102,149 @@ export async function onRequest(context) {
 }
 
 async function handleListSo(env, corsHeaders) {
-    const sheets = await initializeSheets(env);
-    
-    const response = await sheets.api.spreadsheets.values.get({
-        spreadsheetId: sheets.spreadsheetId,
-        range: 'List_so!A:B',
-    });
+    try {
+        const sheets = await initializeSheets(env);
+        
+        const response = await sheets.api.spreadsheets.values.get({
+            spreadsheetId: sheets.spreadsheetId,
+            range: 'List_so!A:B',
+        });
 
-    const rows = response.data.values || [];
-    const items = rows.slice(1)
-        .map(row => ({
-            plu: (row[0]?.toString().trim() || ''),
-            namaBarang: (row[1]?.toString().trim() || '')
-        }))
-        .filter(item => item.plu && item.namaBarang);
+        const rows = response.data.values || [];
+        const items = rows.slice(1)
+            .map(row => ({
+                plu: (row[0]?.toString().trim() || ''),
+                namaBarang: (row[1]?.toString().trim() || '')
+            }))
+            .filter(item => item.plu && item.namaBarang);
 
-    return new Response(JSON.stringify({
-        success: true,
-        data: items,
-        count: items.length
-    }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+        return new Response(JSON.stringify({
+            success: true,
+            data: items,
+            count: items.length
+        }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    } catch (error) {
+        return new Response(JSON.stringify({
+            success: false,
+            error: 'Gagal memuat data barang: ' + error.message
+        }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
 }
 
 async function handleAbsensi(env, corsHeaders) {
-    const sheets = await initializeSheets(env);
-    
-    const response = await sheets.api.spreadsheets.values.get({
-        spreadsheetId: sheets.spreadsheetId,
-        range: 'Absensi!A:Z',
-    });
+    try {
+        const sheets = await initializeSheets(env);
+        
+        const response = await sheets.api.spreadsheets.values.get({
+            spreadsheetId: sheets.spreadsheetId,
+            range: 'Absensi!A:Z',
+        });
 
-    const rows = response.data.values || [];
-    
-    if (rows.length <= 1) {
+        const rows = response.data.values || [];
+        
+        if (rows.length <= 1) {
+            return new Response(JSON.stringify({
+                success: true,
+                data: [],
+                count: 0
+            }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+        
+        const headers = rows[0].map(h => h.toString().toLowerCase().trim());
+        
+        // Find column indices dynamically
+        const namaIndex = headers.findIndex(h => h.includes('nama'));
+        const nikIndex = headers.findIndex(h => h.includes('nik'));
+        const jabatanIndex = headers.findIndex(h => h.includes('jabatan'));
+        
+        // Map data
+        const items = rows.slice(1)
+            .map(row => ({
+                nik: (row[nikIndex]?.toString().trim() || ''),
+                nama: (row[namaIndex]?.toString().trim() || ''),
+                jabatan: (row[jabatanIndex]?.toString().trim() || '')
+            }))
+            .filter(item => item.nama);
+
         return new Response(JSON.stringify({
             success: true,
-            data: [],
-            count: 0
+            data: items,
+            count: items.length
         }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
+    } catch (error) {
+        return new Response(JSON.stringify({
+            success: false,
+            error: 'Gagal memuat data absensi: ' + error.message
+        }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
     }
-    
-    const headers = rows[0].map(h => h.toString().toLowerCase().trim());
-    
-    // Find column indices dynamically
-    const namaIndex = headers.findIndex(h => h.includes('nama'));
-    const nikIndex = headers.findIndex(h => h.includes('nik'));
-    const jabatanIndex = headers.findIndex(h => h.includes('jabatan'));
-    
-    // Map data
-    const items = rows.slice(1)
-        .map(row => ({
-            nik: (row[nikIndex]?.toString().trim() || ''),
-            nama: (row[namaIndex]?.toString().trim() || ''),
-            jabatan: (row[jabatanIndex]?.toString().trim() || '')
-        }))
-        .filter(item => item.nama);
-
-    return new Response(JSON.stringify({
-        success: true,
-        data: items,
-        count: items.length
-    }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
 }
 
 async function handleSoRawan(request, env, corsHeaders) {
-    const data = await request.json();
-    const { nama, tanggal_rekap, shift, items } = data;
+    try {
+        const data = await request.json();
+        const { nama, tanggal_rekap, shift, items } = data;
 
-    if (!nama || !tanggal_rekap || !shift || !items || items.length === 0) {
+        if (!nama || !tanggal_rekap || !shift || !items || items.length === 0) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: 'Data tidak lengkap: nama, tanggal, shift, dan items wajib diisi'
+            }), {
+                status: 400,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+
+        const sheets = await initializeSheets(env);
+        const timestamp = new Date().toISOString();
+
+        const rows = items.map(item => [
+            generateUniqueId(nama, shift, tanggal_rekap, item.plu),
+            timestamp,
+            nama,
+            tanggal_rekap,
+            shift,
+            item.plu,
+            item.namaBarang,
+            item.oh.toString(),
+            item.fisik.toString(),
+            item.selisih.toString(),
+            'Website'
+        ]);
+
+        await sheets.api.spreadsheets.values.append({
+            spreadsheetId: sheets.spreadsheetId,
+            range: 'SoRawan!A:K',
+            valueInputOption: 'USER_ENTERED',
+            requestBody: { values: rows }
+        });
+
+        return new Response(JSON.stringify({
+            success: true,
+            message: `Data SO Rawan berhasil disimpan (${items.length} items)`
+        }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    } catch (error) {
         return new Response(JSON.stringify({
             success: false,
-            error: 'Data tidak lengkap'
+            error: 'Gagal menyimpan data: ' + error.message
         }), {
-            status: 400,
+            status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     }
-
-    const sheets = await initializeSheets(env);
-    const timestamp = new Date().toISOString();
-
-    const rows = items.map(item => [
-        generateUniqueId(nama, shift, tanggal_rekap, item.plu),
-        timestamp,
-        nama,
-        tanggal_rekap,
-        shift,
-        item.plu,
-        item.namaBarang,
-        item.oh.toString(),
-        item.fisik.toString(),
-        item.selisih.toString(),
-        'Website'
-    ]);
-
-    await sheets.api.spreadsheets.values.append({
-        spreadsheetId: sheets.spreadsheetId,
-        range: 'SoRawan!A:K',
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: rows }
-    });
-
-    return new Response(JSON.stringify({
-        success: true,
-        message: `Data SO Rawan berhasil disimpan (${items.length} items)`
-    }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
 }
 
 function generateUniqueId(...args) {
