@@ -1,63 +1,28 @@
-# Website Rekap SO Rawan Hilang
+# Rekap SO Rawan Hilang
 
-Website untuk input data Stock Opname (SO) barang rawan hilang yang terintegrasi dengan Google Spreadsheet dan WhatsApp Bot.
-
-## Fitur
-
-- Input data SO Rawan Hilang
-- Pilih kasir dari daftar absensi
-- Pilih item dari daftar barang
-- Input OH (On Hand) dan Fisik oleh user
-- Perhitungan selisih otomatis
-- Riwayat input harian
-- Sinkronisasi data dengan WhatsApp Bot
-- **UPSERT Mechanism** - Update data jika sudah ada, Insert jika baru
-- **Duplicate Prevention** - Menggunakan ID yang sama dengan bot WhatsApp
-- Tampilan modern dan responsif
+Aplikasi web untuk input data Stock Opname barang rawan hilang yang terintegrasi dengan Google Sheets dan WhatsApp Bot.
 
 ## Setup
 
-### 1. Google Spreadsheet
-
-Buat spreadsheet dengan worksheet berikut:
-
-1. **List_so** - Daftar barang rawan hilang
-   - Kolom A: PLU
-   - Kolom B: Nama Barang
-
-2. **Absensi** - Daftar kasir
-   - Kolom A: NIK
-   - Kolom B: Nama
-   - Kolom C: Jabatan
-   - Kolom D: Tanggal
-   - Kolom E: Shift
-   - Kolom F: No Handphone
-
-3. **SoRawan** - Penyimpanan data input (SAMA DENGAN BOT WHATSAPP)
-   - Kolom A: ID (hash unik)
-   - Kolom B: Timestamp
-   - Kolom C: Nama Kasir
-   - Kolom D: Tanggal Rekap
-   - Kolom E: Shift
-   - Kolom F: PLU
-   - Kolom G: Nama Barang
-   - Kolom H: OH
-   - Kolom I: Fisik
-   - Kolom J: Selisih
-   - Kolom K: Pengirim
-
-### 2. Google Sheets API
+### 1. Google Sheets API Setup
 
 1. Buka [Google Cloud Console](https://console.cloud.google.com/)
-2. Buat project baru atau pilih project yang sudah ada
-3. Aktifkan Google Sheets API
-4. Buat API Key
-5. Batasi API Key untuk hanya mengakses Google Sheets API
+2. Buat project baru atau pilih existing
+3. Enable **Google Sheets API**
+4. Buat **API Key** di Credentials
+5. Restrict API Key untuk hanya mengakses Google Sheets API
 
-### 3. Konfigurasi Website
+### 2. Google Sheet Setup
 
-Edit file `index.html` dan ganti nilai berikut:
+1. Buat spreadsheet baru atau gunakan existing
+2. Buka **Share** → **Change to anyone with the link** → **Viewer**
+3. Copy **Spreadsheet ID** dari URL:
+   `https://docs.google.com/spreadsheets/d/[SPREADSHEET_ID]/edit`
+
+### 3. Konfigurasi Aplikasi
+
+Edit file `index.html` dan ganti:
 
 ```javascript
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // Ganti dengan ID spreadsheet Anda
-const API_KEY = 'YOUR_API_KEY'; // Ganti dengan API key Anda
+const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // Ganti dengan ID spreadsheet
+const API_KEY = 'YOUR_API_KEY'; // Ganti dengan API key
