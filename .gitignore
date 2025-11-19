@@ -1,8 +1,0 @@
-# Build files
-/build
-
-# Shell scripts (if you don't want to commit them)
-*.sh
-
-# Cloudflare specific
-.cfignore
