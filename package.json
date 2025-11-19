@@ -1,9 +1,0 @@
-{
-  "name": "so-rawan-website",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "build": "echo 'Building static site...' && find . -name '*.html' -o -name '*.css' -o -name '*.js' | head -5 && echo 'Build complete!'"
-  },
-  "devDependencies": {}
-}
