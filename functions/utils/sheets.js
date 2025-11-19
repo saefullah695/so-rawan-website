@@ -1,43 +1,31 @@
-import { GoogleAuth } from 'google-auth-library';
-import { google } from 'googleapis';
-
+// Google Sheets initialization for Cloudflare Pages
 export async function initializeSheets(env) {
     try {
         if (!env.GS_CLIENT_EMAIL || !env.GS_PRIVATE_KEY || !env.SPREADSHEET_ID) {
-            throw new Error('Missing required environment variables: GS_CLIENT_EMAIL, GS_PRIVATE_KEY, SPREADSHEET_ID');
+            throw new Error('Missing required environment variables');
         }
+
+        // Dynamic import for Google APIs
+        const { GoogleAuth } = await import('google-auth-library');
+        const { google } = await import('googleapis');
 
         const auth = new GoogleAuth({
             credentials: {
                 client_email: env.GS_CLIENT_EMAIL,
                 private_key: env.GS_PRIVATE_KEY.replace(/\\n/g, '\n'),
             },
-            scopes: [
-                'https://www.googleapis.com/auth/spreadsheets',
-                'https://www.googleapis.com/auth/drive.file'
-            ],
+            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         });
 
         const sheets = google.sheets({ version: 'v4', auth });
-        const spreadsheetId = env.SPREADSHEET_ID;
-
-        // Verify we can access the spreadsheet
-        try {
-            await sheets.spreadsheets.get({
-                spreadsheetId: spreadsheetId
-            });
-        } catch (error) {
-            throw new Error(`Cannot access spreadsheet: ${error.message}`);
-        }
-
+        
         return { 
             api: sheets, 
-            spreadsheetId,
-            auth 
+            spreadsheetId: env.SPREADSHEET_ID
         };
 
     } catch (error) {
-        console.error('Error initializing Google Sheets:', error);
+        console.error('Sheets initialization error:', error);
         throw error;
     }
 }
