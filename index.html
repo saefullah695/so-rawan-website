@@ -156,6 +156,12 @@
             font-weight: bold;
         }
         
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+        
         @media (max-width: 768px) {
             .glass-card {
                 padding: 15px;
@@ -163,6 +169,10 @@
             
             .header h1 {
                 font-size: 1.8rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
             }
         }
     </style>
@@ -172,6 +182,13 @@
         <div class="header">
             <h1><i class="fas fa-clipboard-list me-2"></i>Rekap SO Rawan Hilang</h1>
             <p>Sistem input data Stock Opname barang rawan hilang - Terintegrasi dengan WhatsApp Bot</p>
+        </div>
+        
+        <!-- Status Connection -->
+        <div class="alert alert-warning alert-dismissible fade show" id="connectionAlert" style="display: none;">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span id="alertMessage"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         
         <div class="row">
@@ -240,7 +257,7 @@
                     <h3><i class="fas fa-info-circle me-2"></i>Status Sistem</h3>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span>Koneksi Google Sheets:</span>
-                        <span class="status-badge status-success" id="sheetStatus">Terhubung</span>
+                        <span class="status-badge" id="sheetStatus">Memeriksa...</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span>Total Item Tersedia:</span>
@@ -331,19 +348,27 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Konfigurasi Google Sheets - GANTI DENGAN MILIK ANDA
+        // ==============================
+        // KONFIGURASI - UBAH BAGIAN INI
+        // ==============================
         const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // Ganti dengan ID spreadsheet Anda
         const API_KEY = 'YOUR_API_KEY'; // Ganti dengan API key Anda
         
         // Nama worksheet - HARUS SAMA DENGAN BOT WHATSAPP
         const LIST_SO_SHEET = 'List_so';
         const ABSENSI_SHEET = 'Absensi';
-        const SO_RAWAN_SHEET = 'SoRawan'; // Worksheet untuk menyimpan data - SAMA DENGAN BOT
-        
-        // Variabel global
+        const SO_RAWAN_SHEET = 'SoRawan';
+
+        // ==============================
+        // VARIABEL GLOBAL
+        // ==============================
         let listItems = [];
         let kasirList = [];
         let currentItems = [];
+        
+        // ==============================
+        // FUNGSI UTILITAS
+        // ==============================
         
         // Fungsi generateUniqueId - SAMA DENGAN BOT WHATSAPP
         function generateUniqueId(...args) {
@@ -358,21 +383,17 @@
             try {
                 let dateObj;
                 
-                // Format DD-MM-YYYY
                 if (dateString.match(/^\d{2}-\d{2}-\d{4}$/)) {
                     const [day, month, year] = dateString.split('-');
                     dateObj = new Date(`${year}-${month}-${day}`);
                 }
-                // Format DD/MM/YYYY
                 else if (dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
                     const [day, month, year] = dateString.split('/');
                     dateObj = new Date(`${year}-${month}-${day}`);
                 }
-                // Format YYYY-MM-DD (ISO)
                 else if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
                     dateObj = new Date(dateString);
                 }
-                // Format lain, coba parsing langsung
                 else {
                     dateObj = new Date(dateString);
                 }
@@ -391,20 +412,39 @@
             }
         }
         
-        // Fungsi untuk mengambil data dari Google Sheets
+        // ==============================
+        // FUNGSI GOOGLE SHEETS API
+        // ==============================
+        
+        // Fungsi untuk mengambil data dari Google Sheets dengan error handling
         async function fetchSheetData(sheetName, range = '') {
+            if (!SPREADSHEET_ID || !API_KEY) {
+                showConnectionError('SPREADSHEET_ID atau API_KEY belum dikonfigurasi');
+                return [];
+            }
+            
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${sheetName}${range ? '!' + range : ''}?key=${API_KEY}`;
             
             try {
+                console.log(`Fetching data from: ${sheetName}`);
                 const response = await fetch(url);
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    if (response.status === 403) {
+                        throw new Error('API Key tidak valid atau tidak diizinkan mengakses spreadsheet');
+                    } else if (response.status === 404) {
+                        throw new Error('Spreadsheet tidak ditemukan. Periksa SPREADSHEET_ID');
+                    } else {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                 }
+                
                 const data = await response.json();
+                console.log(`Data received from ${sheetName}:`, data.values ? data.values.length : 0, 'rows');
                 return data.values || [];
             } catch (error) {
                 console.error(`Error fetching data from ${sheetName}:`, error);
-                showError(`Gagal mengambil data dari ${sheetName}`);
+                showConnectionError(`Gagal mengambil data dari ${sheetName}: ${error.message}`);
                 return [];
             }
         }
@@ -461,23 +501,32 @@
             }
         }
         
+        // ==============================
+        // FUNGSI MANAJEMEN DATA
+        // ==============================
+        
         // Fungsi untuk memuat data item dari worksheet List_so
         async function loadListItems() {
             showLoading();
             const data = await fetchSheetData(LIST_SO_SHEET);
             
             if (data.length > 0) {
-                // Skip header row
                 listItems = data.slice(1).map(row => ({
                     plu: row[0] || '',
                     nama: row[1] || ''
-                }));
+                })).filter(item => item.plu && item.nama); // Filter item yang valid
                 
                 updateItemSelect();
                 updateTotalItems();
+                updateConnectionStatus(true, 'Terhubung');
                 hideLoading();
+                
+                if (listItems.length === 0) {
+                    showConnectionError('Tidak ada data item yang valid di worksheet List_so');
+                }
             } else {
                 console.error('Tidak ada data item ditemukan');
+                updateConnectionStatus(false, 'Data kosong');
                 hideLoading();
             }
         }
@@ -487,10 +536,12 @@
             const data = await fetchSheetData(ABSENSI_SHEET);
             
             if (data.length > 0) {
-                // Skip header row, ambil kolom nama (asumsi kolom kedua)
                 kasirList = [...new Set(data.slice(1).map(row => row[1] || '').filter(name => name))];
-                
                 updateKasirSelect();
+                
+                if (kasirList.length === 0) {
+                    console.warn('Tidak ada data kasir yang valid di worksheet Absensi');
+                }
             } else {
                 console.error('Tidak ada data kasir ditemukan');
             }
@@ -530,11 +581,6 @@
             
             if (itemSelect.value === '') {
                 alert('Pilih item terlebih dahulu!');
-                return;
-            }
-            
-            if (ohInput.value === '' || fisikInput.value === '') {
-                alert('Isi OH dan Fisik terlebih dahulu!');
                 return;
             }
             
@@ -579,7 +625,6 @@
             currentItems.forEach((item, index) => {
                 const row = document.createElement('tr');
                 
-                // Tentukan kelas selisih
                 let selisihClass = 'selisih-zero';
                 if (item.selisih > 0) {
                     selisihClass = 'selisih-positive';
@@ -605,7 +650,6 @@
                 tbody.appendChild(row);
             });
             
-            // Update item count
             document.getElementById('itemCount').textContent = `${currentItems.length} Item`;
         }
         
@@ -617,37 +661,61 @@
         
         // Fungsi untuk menghapus semua item
         function clearAllItems() {
+            if (currentItems.length === 0) {
+                alert('Tidak ada item untuk dihapus!');
+                return;
+            }
+            
             if (confirm('Apakah Anda yakin ingin menghapus semua item?')) {
                 currentItems = [];
                 updateItemsTable();
             }
         }
         
-        // Fungsi untuk memperbarui statistik
+        // ==============================
+        // FUNGSI STATUS & UTILITAS UI
+        // ==============================
+        
         function updateTotalItems() {
             document.getElementById('totalItems').textContent = listItems.length;
         }
         
-        // Fungsi untuk menampilkan loading
         function showLoading() {
             document.getElementById('loading').style.display = 'block';
         }
         
-        // Fungsi untuk menyembunyikan loading
         function hideLoading() {
             document.getElementById('loading').style.display = 'none';
         }
 
-        // Fungsi untuk menampilkan error
-        function showError(message) {
-            alert(`Error: ${message}`);
+        function showConnectionError(message) {
+            const alert = document.getElementById('connectionAlert');
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.textContent = message;
+            alert.style.display = 'block';
+            updateConnectionStatus(false, 'Error');
         }
+
+        function updateConnectionStatus(isConnected, message) {
+            const statusElement = document.getElementById('sheetStatus');
+            statusElement.textContent = message;
+            
+            if (isConnected) {
+                statusElement.className = 'status-badge status-success';
+            } else {
+                statusElement.className = 'status-badge status-warning';
+            }
+        }
+        
+        // ==============================
+        // FUNGSI UTAMA - SUBMIT DATA
+        // ==============================
         
         // Fungsi untuk mencari data existing di SoRawan worksheet
         async function findExistingData(nama, shift, tanggal, plu) {
             try {
                 const data = await fetchSheetData(SO_RAWAN_SHEET);
-                if (data.length < 2) return null; // Hanya header atau kosong
+                if (data.length < 2) return null;
                 
                 const headers = data[0];
                 const idColumn = headers.indexOf('ID');
@@ -656,7 +724,6 @@
                 const tanggalColumn = headers.indexOf('Tanggal Rekap');
                 const pluColumn = headers.indexOf('PLU');
                 
-                // Generate ID yang sama dengan bot
                 const searchId = generateUniqueId(nama, shift, tanggal, plu);
                 
                 for (let i = 1; i < data.length; i++) {
@@ -676,7 +743,7 @@
             }
         }
         
-        // Fungsi untuk mengirim data ke Google Sheets (DENGAN MEKANISME UPSERT)
+        // Fungsi untuk mengirim data ke Google Sheets
         async function submitData() {
             if (currentItems.length === 0) {
                 alert('Tidak ada item yang ditambahkan!');
@@ -695,65 +762,62 @@
             showLoading();
             
             try {
-                // Format tanggal untuk konsistensi (sama dengan bot)
-                const dateObj = new Date(tanggal);
                 const formattedDate = standardizeDateFormat(tanggal);
-                
                 let successCount = 0;
                 let updateCount = 0;
+                let errorCount = 0;
                 
-                // Kirim setiap item sebagai baris terpisah
                 for (const item of currentItems) {
-                    // Generate ID yang sama dengan bot
-                    const uniqueId = generateUniqueId(namaKasir, shift, formattedDate, item.plu);
-                    const timestamp = new Date().toISOString();
-                    
-                    // Cek apakah data sudah ada
-                    const existingData = await findExistingData(namaKasir, shift, formattedDate, item.plu);
-                    
-                    // Data row sesuai dengan struktur bot WhatsApp
-                    const rowData = [
-                        uniqueId,           // ID
-                        timestamp,          // Timestamp
-                        namaKasir,          // Nama Kasir
-                        formattedDate,      // Tanggal Rekap
-                        shift,              // Shift
-                        item.plu,           // PLU
-                        item.nama,          // Nama Barang
-                        item.oh,            // OH
-                        item.fisik,         // Fisik
-                        item.selisih,       // Selisih
-                        'Website'           // Pengirim
-                    ];
-                    
-                    if (existingData) {
-                        // Update data existing
-                        const range = `A${existingData.rowIndex + 1}:K${existingData.rowIndex + 1}`;
-                        await updateSheetData(SO_RAWAN_SHEET, range, rowData);
-                        updateCount++;
-                    } else {
-                        // Tambah data baru
-                        await appendToSheet(SO_RAWAN_SHEET, rowData);
-                        successCount++;
+                    try {
+                        const uniqueId = generateUniqueId(namaKasir, shift, formattedDate, item.plu);
+                        const timestamp = new Date().toISOString();
+                        
+                        const existingData = await findExistingData(namaKasir, shift, formattedDate, item.plu);
+                        
+                        const rowData = [
+                            uniqueId,
+                            timestamp,
+                            namaKasir,
+                            formattedDate,
+                            shift,
+                            item.plu,
+                            item.nama,
+                            item.oh,
+                            item.fisik,
+                            item.selisih,
+                            'Website'
+                        ];
+                        
+                        if (existingData) {
+                            const range = `A${existingData.rowIndex + 1}:K${existingData.rowIndex + 1}`;
+                            await updateSheetData(SO_RAWAN_SHEET, range, rowData);
+                            updateCount++;
+                        } else {
+                            await appendToSheet(SO_RAWAN_SHEET, rowData);
+                            successCount++;
+                        }
+                    } catch (error) {
+                        console.error(`Error processing item ${item.plu}:`, error);
+                        errorCount++;
                     }
                 }
                 
-                let message = `Data berhasil disimpan!`;
-                if (successCount > 0) {
-                    message += ` ${successCount} item baru ditambahkan.`;
-                }
-                if (updateCount > 0) {
-                    message += ` ${updateCount} item diperbarui.`;
-                }
+                let message = `Data berhasil diproses!`;
+                if (successCount > 0) message += ` ${successCount} item baru ditambahkan.`;
+                if (updateCount > 0) message += ` ${updateCount} item diperbarui.`;
+                if (errorCount > 0) message += ` ${errorCount} item gagal.`;
                 
                 alert(message);
                 
-                // Reset form
-                document.getElementById('soForm').reset();
-                currentItems = [];
-                updateItemsTable();
+                // Reset form hanya jika semua berhasil
+                if (errorCount === 0) {
+                    document.getElementById('soForm').reset();
+                    document.getElementById('oh').value = '0';
+                    document.getElementById('fisik').value = '0';
+                    currentItems = [];
+                    updateItemsTable();
+                }
                 
-                // Refresh riwayat
                 loadHistory();
                 
             } catch (error) {
@@ -781,13 +845,11 @@
                 const shiftCol = headers.indexOf('Shift');
                 const pengirimCol = headers.indexOf('Pengirim');
                 
-                // Skip header, filter data hari ini, dan kelompokkan berdasarkan kasir, tanggal, dan shift
                 const todayData = data.slice(1).filter(row => {
                     const rowDate = row[tanggalCol];
                     return standardizeDateFormat(rowDate) === formattedToday;
                 });
                 
-                // Kelompokkan data
                 const groupedData = {};
                 todayData.forEach(row => {
                     const key = `${row[namaCol]}-${row[tanggalCol]}-${row[shiftCol]}-${row[pengirimCol]}`;
@@ -804,9 +866,11 @@
                     groupedData[key].count++;
                 });
                 
-                // Tampilkan data yang dikelompokkan
                 Object.values(groupedData).forEach(item => {
                     const row = document.createElement('tr');
+                    const waktu = new Date(item.waktu);
+                    const waktuFormatted = isNaN(waktu.getTime()) ? item.waktu : waktu.toLocaleTimeString('id-ID');
+                    
                     row.innerHTML = `
                         <td>${item.tanggal}</td>
                         <td>${item.shift}</td>
@@ -817,7 +881,7 @@
                                 ${item.pengirim}
                             </span>
                         </td>
-                        <td>${new Date(item.waktu).toLocaleTimeString('id-ID')}</td>
+                        <td>${waktuFormatted}</td>
                     `;
                     tbody.appendChild(row);
                 });
@@ -842,13 +906,16 @@
             }
         }
         
-        // Inisialisasi saat halaman dimuat
+        // ==============================
+        // INISIALISASI APLIKASI
+        // ==============================
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Set tanggal hari ini sebagai default
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('tanggal').value = today;
             
-            // Muat data
+            // Muat data awal
             loadListItems();
             loadKasirList();
             loadHistory();
@@ -866,6 +933,12 @@
                 loadHistory();
             });
             document.getElementById('syncBtn').addEventListener('click', syncData);
+            
+            // Cek konfigurasi
+            if (!SPREADSHEET_ID || SPREADSHEET_ID === 'YOUR_SPREADSHEET_ID' || 
+                !API_KEY || API_KEY === 'YOUR_API_KEY') {
+                showConnectionError('Silakan konfigurasi SPREADSHEET_ID dan API_KEY terlebih dahulu');
+            }
         });
     </script>
 </body>
