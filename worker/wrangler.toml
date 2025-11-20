@@ -1,12 +1,14 @@
-name = "so-rawan-hilang-worker"
-main = "worker.js"
-compatibility_date = "2025-11-20"
-compatibility_flags = ["nodejs_compat"]
-
-[vars]
-# Environment variables akan di-set via Cloudflare Dashboard
-# SERVICE_ACCOUNT_EMAIL = "your-service-account@your-project.iam.gserviceaccount.com"
-# PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
-
-[env.production]
-# Production-specific variables (optional)
+{
+  "name": "so-rawan-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker untuk aplikasi Rekap SO Rawan Hilang",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
