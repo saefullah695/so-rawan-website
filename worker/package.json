@@ -1,20 +1,13 @@
 {
-  "name": "so-rawan-hilang-worker",
+  "name": "so-rawan-worker",
   "version": "1.0.0",
-  "description": "Cloudflare Worker for SO Rawan Hilang Google Sheets Integration",
+  "description": "Cloudflare Worker untuk aplikasi Rekap SO Rawan Hilang",
   "main": "worker.js",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "test": "echo \"No tests specified\" && exit 0"
+    "deploy": "wrangler deploy"
   },
-  "keywords": [
-    "cloudflare-worker",
-    "google-sheets",
-    "stock-opname"
-  ],
-  "author": "Your Name",
-  "license": "MIT",
+  "dependencies": {},
   "devDependencies": {
     "wrangler": "^3.0.0"
   }
