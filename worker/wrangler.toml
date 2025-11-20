@@ -1,0 +1,11 @@
+name = "so-rawan-hilang-worker"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Environment variables akan di-set via Cloudflare Dashboard
+# SERVICE_ACCOUNT_EMAIL = "your-service-account@your-project.iam.gserviceaccount.com"
+# PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+
+[env.production]
+# Production-specific variables (optional)
