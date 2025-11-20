@@ -1,28 +1,35 @@
-# Rekap SO Rawan Hilang
+# SO Rawan Hilang - Cloudflare Pages
 
-Aplikasi web untuk input data Stock Opname barang rawan hilang yang terintegrasi dengan Google Sheets dan WhatsApp Bot.
+Sistem input data Stock Opname barang rawan hilang yang terintegrasi dengan Google Sheets dan WhatsApp Bot.
 
-## Setup
+## Fitur
 
-### 1. Google Sheets API Setup
+- Input data SO barang rawan hilang
+- Integrasi dengan Google Sheets via Service Account
+- Sinkronisasi data dengan WhatsApp Bot
+- Interface responsive dengan glassmorphism design
+- Validasi data dan prevent duplikasi
 
-1. Buka [Google Cloud Console](https://console.cloud.google.com/)
-2. Buat project baru atau pilih existing
-3. Enable **Google Sheets API**
-4. Buat **API Key** di Credentials
-5. Restrict API Key untuk hanya mengakses Google Sheets API
+## Setup Environment Variables
 
-### 2. Google Sheet Setup
+Di Cloudflare Dashboard, set environment variables berikut:
 
-1. Buat spreadsheet baru atau gunakan existing
-2. Buka **Share** → **Change to anyone with the link** → **Viewer**
-3. Copy **Spreadsheet ID** dari URL:
-   `https://docs.google.com/spreadsheets/d/[SPREADSHEET_ID]/edit`
+- `SPREADSHEET_ID`: ID Google Spreadsheet Anda
+- `LIST_SO_SHEET`: Nama sheet untuk list barang (default: List_so)
+- `ABSENSI_SHEET`: Nama sheet untuk data kasir (default: Absensi)  
+- `SO_RAWAN_SHEET`: Nama sheet untuk data SO (default: SoRawan)
+- `GOOGLE_SERVICE_ACCOUNT`: JSON credentials Service Account
 
-### 3. Konfigurasi Aplikasi
+## Deployment
 
-Edit file `index.html` dan ganti:
+1. Connect repository ke Cloudflare Pages
+2. Set build command: (kosongkan)
+3. Set build output directory: `public`
+4. Set environment variables di Cloudflare Dashboard
+5. Deploy otomatis dari branch main
 
-```javascript
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // Ganti dengan ID spreadsheet
-const API_KEY = 'YOUR_API_KEY'; // Ganti dengan API key
+## Development
+
+```bash
+npm install
+npm run dev
