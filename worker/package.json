@@ -1,0 +1,21 @@
+{
+  "name": "so-rawan-hilang-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker for SO Rawan Hilang Google Sheets Integration",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "cloudflare-worker",
+    "google-sheets",
+    "stock-opname"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
