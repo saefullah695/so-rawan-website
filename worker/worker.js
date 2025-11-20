@@ -2,7 +2,7 @@
 export default {
   async fetch(request, env, ctx) {
     return handleRequest(request, env, ctx);
-  }
+  },
 };
 
 async function handleRequest(request, env) {
@@ -22,16 +22,16 @@ async function handleRequest(request, env) {
   }
 
   try {
-    // Get access token using service account credentials from environment
+    // Dapatkan access token dari service account
     const accessToken = await getAccessToken(env);
 
-    // Route handling
+    // Routing API
     if (path === '/api/sheets' && request.method === 'GET') {
-      return await getSheetData(request, accessToken);
+      return await getSheetData(request, accessToken, env);
     } else if (path === '/api/sheets/append' && request.method === 'POST') {
-      return await appendToSheet(request, accessToken);
+      return await appendToSheet(request, accessToken, env);
     } else if (path === '/api/sheets/update' && request.method === 'PUT') {
-      return await updateSheetData(request, accessToken);
+      return await updateSheetData(request, accessToken, env);
     } else {
       return new Response('Not Found', { status: 404, headers: corsHeaders });
     }
@@ -50,11 +50,18 @@ async function handleRequest(request, env) {
   }
 }
 
-// Get Google OAuth2 access token using JWT
+// --- Utility untuk normalisasi Private Key ---
+function normalizePrivateKey(raw) {
+  if (!raw) throw new Error('PRIVATE_KEY missing');
+  // jika berisi literal '\n', ubah jadi newline sesungguhnya
+  return raw.includes('\\n') ? raw.replace(/\\n/g, '\n') : raw;
+}
+
+// --- Ambil access token dari Service Account ---
 async function getAccessToken(env) {
   const serviceAccount = {
     client_email: env.SERVICE_ACCOUNT_EMAIL,
-    private_key: env.PRIVATE_KEY,
+    private_key: normalizePrivateKey(env.PRIVATE_KEY),
   };
 
   const now = Math.floor(Date.now() / 1000);
@@ -104,7 +111,7 @@ async function getAccessToken(env) {
   return tokenData.access_token;
 }
 
-// Sign JWT using RSA-SHA256
+// --- Fungsi untuk menandatangani JWT ---
 async function signJWT(data, privateKey) {
   const pemContents = privateKey
     .replace(/-----BEGIN PRIVATE KEY-----/, '')
@@ -131,10 +138,10 @@ async function signJWT(data, privateKey) {
   return String.fromCharCode(...new Uint8Array(signature));
 }
 
-// Get data from Google Sheets
-async function getSheetData(request, accessToken) {
+// --- Ambil data dari Google Sheets ---
+async function getSheetData(request, accessToken, env) {
   const url = new URL(request.url);
-  const spreadsheetId = url.searchParams.get('spreadsheetId');
+  const spreadsheetId = env.SPREADSHEET_ID;
   const sheetName = url.searchParams.get('sheetName');
   const range = url.searchParams.get('range') || '';
 
@@ -168,9 +175,10 @@ async function getSheetData(request, accessToken) {
   });
 }
 
-// Append data to Google Sheets
-async function appendToSheet(request, accessToken) {
-  const { spreadsheetId, sheetName, values } = await request.json();
+// --- Tambah data ke Google Sheets ---
+async function appendToSheet(request, accessToken, env) {
+  const { sheetName, values } = await request.json();
+  const spreadsheetId = env.SPREADSHEET_ID;
 
   if (!spreadsheetId || !sheetName || !values) {
     return new Response(
@@ -205,9 +213,10 @@ async function appendToSheet(request, accessToken) {
   });
 }
 
-// Update data in Google Sheets
-async function updateSheetData(request, accessToken) {
-  const { spreadsheetId, sheetName, range, values } = await request.json();
+// --- Update data di Google Sheets ---
+async function updateSheetData(request, accessToken, env) {
+  const { sheetName, range, values } = await request.json();
+  const spreadsheetId = env.SPREADSHEET_ID;
 
   if (!spreadsheetId || !sheetName || !range || !values) {
     return new Response(
