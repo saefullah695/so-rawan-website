@@ -1,35 +1,31 @@
-# SO Rawan Hilang - Cloudflare Pages
+# SO Rawan Hilang - Stock Opname System
 
-Sistem input data Stock Opname barang rawan hilang yang terintegrasi dengan Google Sheets dan WhatsApp Bot.
+Sistem input data Stock Opname barang rawan hilang dengan integrasi Google Sheets dan WhatsApp Bot.
 
 ## Fitur
+- Input data SO rawan hilang
+- Integrasi dengan Google Sheets
+- Sinkronisasi dengan WhatsApp Bot
+- Antarmuka responsive
+- Validasi data duplikat
 
-- Input data SO barang rawan hilang
-- Integrasi dengan Google Sheets via Service Account
-- Sinkronisasi data dengan WhatsApp Bot
-- Interface responsive dengan glassmorphism design
-- Validasi data dan prevent duplikasi
+## Teknologi
+- HTML5, CSS3, JavaScript
+- Bootstrap 5.3.0
+- Font Awesome 6.4.0
+- Crypto-JS 4.1.1
+- Cloudflare Worker
+- Google Sheets API
 
-## Setup Environment Variables
-
-Di Cloudflare Dashboard, set environment variables berikut:
-
-- `SPREADSHEET_ID`: ID Google Spreadsheet Anda
-- `LIST_SO_SHEET`: Nama sheet untuk list barang (default: List_so)
-- `ABSENSI_SHEET`: Nama sheet untuk data kasir (default: Absensi)  
-- `SO_RAWAN_SHEET`: Nama sheet untuk data SO (default: SoRawan)
-- `GOOGLE_SERVICE_ACCOUNT`: JSON credentials Service Account
+## Setup
+1. Clone repository ini
+2. Deploy Cloudflare Worker (lihat worker/README.md)
+3. Konfigurasi Google Service Account
+4. Update SPREADSHEET_ID dan WORKER_URL di index.html
 
 ## Deployment
+- Frontend: Hosting static (Netlify, Vercel, GitHub Pages)
+- Backend: Cloudflare Worker
 
-1. Connect repository ke Cloudflare Pages
-2. Set build command: (kosongkan)
-3. Set build output directory: `public`
-4. Set environment variables di Cloudflare Dashboard
-5. Deploy otomatis dari branch main
-
-## Development
-
-```bash
-npm install
-npm run dev
+## Kontribusi
+Silakan buat pull request untuk perbaikan dan fitur baru.
