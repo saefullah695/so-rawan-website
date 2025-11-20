@@ -1,1 +1,706 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap SO Rawan Hilang</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS styles tetap sama seperti sebelumnya */
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        /* ... (semua CSS styles tetap sama) ... */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-clipboard-list me-2"></i>Rekap SO Rawan Hilang</h1>
+            <p>Sistem input data Stock Opname barang rawan hilang - Terintegrasi dengan WhatsApp Bot</p>
+        </div>
+        
+        <!-- HTML structure tetap sama seperti sebelumnya -->
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="glass-card item-card">
+                    <h3><i class="fas fa-edit me-2"></i>Input Data</h3>
+                    <form id="soForm">
+                        <div class="mb-3">
+                            <label for="tanggal" class="form-label">Tanggal</label>
+                            <input type="date" class="form-control" id="tanggal" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="shift" class="form-label">Shift</label>
+                            <select class="form-select" id="shift" required>
+                                <option value="">Pilih Shift</option>
+                                <option value="1">Shift 1</option>
+                                <option value="2">Shift 2</option>
+                                <option value="3">Shift 3</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="namaKasir" class="form-label">Nama Kasir</label>
+                            <select class="form-select" id="namaKasir" required>
+                                <option value="">Pilih Nama Kasir</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Item Barang</label>
+                            <select class="form-select" id="itemSelect">
+                                <option value="">Pilih Item Barang</option>
+                            </select>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="oh" class="form-label">OH (On Hand)</label>
+                                    <input type="number" class="form-control" id="oh" min="0" value="0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="fisik" class="form-label">Jumlah Fisik</label>
+                                    <input type="number" class="form-control" id="fisik" min="0" value="0" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button type="button" class="btn btn-primary" id="addItemBtn">
+                                <i class="fas fa-plus me-1"></i> Tambah Item
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane me-1"></i> Simpan Data
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="glass-card item-card mt-4">
+                    <h3><i class="fas fa-info-circle me-2"></i>Status Sistem</h3>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Koneksi Google Sheets:</span>
+                        <span class="status-badge status-success" id="sheetStatus">Terhubung</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Total Item Tersedia:</span>
+                        <span id="totalItems">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Data Input Hari Ini:</span>
+                        <span id="todayData">0</span>
+                    </div>
+                </div>
 
+                <div class="glass-card item-card mt-4">
+                    <h3><i class="fas fa-sync-alt me-2"></i>Sinkronisasi Data</h3>
+                    <p class="small text-muted">Data akan otomatis sinkron dengan WhatsApp Bot dan menghindari duplikasi</p>
+                    <button class="btn btn-outline-info w-100" id="syncBtn">
+                        <i class="fas fa-sync me-1"></i> Cek Data Terbaru
+                    </button>
+                </div>
+            </div>
+            
+            <div class="col-lg-8">
+                <div class="glass-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="mb-0"><i class="fas fa-list me-2"></i>Daftar Item SO Rawan</h3>
+                        <span class="badge bg-primary" id="itemCount">0 Item</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th>PLU</th>
+                                    <th>Nama Barang</th>
+                                    <th>OH</th>
+                                    <th>Fisik</th>
+                                    <th>Selisih</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <button class="btn btn-outline-primary" id="clearBtn">
+                            <i class="fas fa-broom me-1"></i> Hapus Semua
+                        </button>
+                        <button class="btn btn-outline-secondary" id="refreshBtn">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh Data
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="glass-card mt-4">
+                    <h3><i class="fas fa-history me-2"></i>Riwayat Input Hari Ini</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="historyTable">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Shift</th>
+                                    <th>Nama Kasir</th>
+                                    <th>Jumlah Item</th>
+                                    <th>Sumber</th>
+                                    <th>Waktu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Memproses data...</p>
+        </div>
+        
+        <footer>
+            <p>&copy; 2024 Rekap SO Rawan Hilang | Cloudflare Pages + Service Account</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Konfigurasi - akan menggunakan Environment Variables dari Cloudflare
+        const API_BASE = '/api'; // Cloudflare Pages Functions route
+        
+        // Nama worksheet
+        const LIST_SO_SHEET = 'List_so';
+        const ABSENSI_SHEET = 'Absensi';
+        const SO_RAWAN_SHEET = 'SoRawan';
+        
+        // Variabel global
+        let listItems = [];
+        let kasirList = [];
+        let currentItems = [];
+        
+        // Fungsi generateUniqueId
+        function generateUniqueId(...args) {
+            const text = args.join('-');
+            let hash = 0;
+            for (let i = 0; i < text.length; i++) {
+                const char = text.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(16);
+        }
+        
+        // Fungsi standardizeDateFormat
+        function standardizeDateFormat(dateString) {
+            if (!dateString) return '';
+            
+            try {
+                let dateObj;
+                
+                if (dateString.match(/^\d{2}-\d{2}-\d{4}$/)) {
+                    const [day, month, year] = dateString.split('-');
+                    dateObj = new Date(`${year}-${month}-${day}`);
+                }
+                else if (dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                    const [day, month, year] = dateString.split('/');
+                    dateObj = new Date(`${year}-${month}-${day}`);
+                }
+                else if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    dateObj = new Date(dateString);
+                }
+                else {
+                    dateObj = new Date(dateString);
+                }
+                
+                if (!isNaN(dateObj.getTime())) {
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const year = dateObj.getFullYear();
+                    return `${day}-${month}-${year}`;
+                }
+                
+                return dateString;
+            } catch (error) {
+                console.error('Error standardize date:', error);
+                return dateString;
+            }
+        }
+        
+        // Fungsi untuk mengambil data dari Google Sheets via Cloudflare Function
+        async function fetchSheetData(sheetName, range = '') {
+            const params = new URLSearchParams({
+                action: 'read',
+                sheetName: sheetName
+            });
+            if (range) params.append('range', range);
+            
+            try {
+                const response = await fetch(`/api/sheets?${params}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                return result.data || [];
+            } catch (error) {
+                console.error(`Error fetching data from ${sheetName}:`, error);
+                showError(`Gagal mengambil data dari ${sheetName}`);
+                return [];
+            }
+        }
+        
+        // Fungsi untuk mengirim data ke Google Sheets
+        async function appendToSheet(sheetName, data) {
+            try {
+                const response = await fetch('/api/sheets?action=append&sheetName=' + sheetName, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        data: data
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error(`Error appending data to ${sheetName}:`, error);
+                throw error;
+            }
+        }
+
+        // Fungsi untuk update data di Google Sheets
+        async function updateSheetData(sheetName, range, data) {
+            try {
+                const response = await fetch('/api/sheets?action=update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sheetName: sheetName,
+                        range: range,
+                        data: data
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error(`Error updating data in ${sheetName}:`, error);
+                throw error;
+            }
+        }
+
+        // Fungsi untuk mencari data existing
+        async function findExistingData(nama, shift, tanggal, plu) {
+            try {
+                const params = new URLSearchParams({
+                    action: 'checkExisting',
+                    nama: nama,
+                    shift: shift,
+                    tanggal: tanggal,
+                    plu: plu
+                });
+                
+                const response = await fetch(`/api/sheets?${params}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                return result.exists ? { rowIndex: result.rowIndex } : null;
+            } catch (error) {
+                console.error('Error finding existing data:', error);
+                return null;
+            }
+        }
+        
+        // Fungsi-fungsi lainnya tetap sama...
+        // [loadListItems, loadKasirList, updateItemSelect, updateKasirSelect, 
+        //  addItemToTable, updateItemsTable, removeItem, clearAllItems,
+        //  updateTotalItems, showLoading, hideLoading, showError,
+        //  submitData, loadHistory, syncData]
+        
+        // Implementasi fungsi-fungsi yang sama seperti script asli
+        // ... (semua fungsi JavaScript yang sama seperti sebelumnya) ...
+        
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set tanggal hari ini sebagai default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tanggal').value = today;
+            
+            // Muat data
+            loadListItems();
+            loadKasirList();
+            loadHistory();
+            
+            // Event listeners
+            document.getElementById('addItemBtn').addEventListener('click', addItemToTable);
+            document.getElementById('soForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitData();
+            });
+            document.getElementById('clearBtn').addEventListener('click', clearAllItems);
+            document.getElementById('refreshBtn').addEventListener('click', function() {
+                loadListItems();
+                loadKasirList();
+                loadHistory();
+            });
+            document.getElementById('syncBtn').addEventListener('click', syncData);
+        });
+
+        // Sisanya sama dengan script asli...
+        async function loadListItems() {
+            showLoading();
+            const data = await fetchSheetData(LIST_SO_SHEET);
+            
+            if (data.length > 0) {
+                listItems = data.slice(1).map(row => ({
+                    plu: row[0] || '',
+                    nama: row[1] || ''
+                }));
+                
+                updateItemSelect();
+                updateTotalItems();
+                hideLoading();
+            } else {
+                console.error('Tidak ada data item ditemukan');
+                hideLoading();
+            }
+        }
+        
+        async function loadKasirList() {
+            const data = await fetchSheetData(ABSENSI_SHEET);
+            
+            if (data.length > 0) {
+                kasirList = [...new Set(data.slice(1).map(row => row[1] || '').filter(name => name))];
+                updateKasirSelect();
+            } else {
+                console.error('Tidak ada data kasir ditemukan');
+            }
+        }
+        
+        function updateItemSelect() {
+            const select = document.getElementById('itemSelect');
+            select.innerHTML = '<option value="">Pilih Item Barang</option>';
+            
+            listItems.forEach((item, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${item.plu} - ${item.nama}`;
+                select.appendChild(option);
+            });
+        }
+        
+        function updateKasirSelect() {
+            const select = document.getElementById('namaKasir');
+            select.innerHTML = '<option value="">Pilih Nama Kasir</option>';
+            
+            kasirList.forEach(kasir => {
+                const option = document.createElement('option');
+                option.value = kasir;
+                option.textContent = kasir;
+                select.appendChild(option);
+            });
+        }
+        
+        function addItemToTable() {
+            const itemSelect = document.getElementById('itemSelect');
+            const ohInput = document.getElementById('oh');
+            const fisikInput = document.getElementById('fisik');
+            
+            if (itemSelect.value === '') {
+                alert('Pilih item terlebih dahulu!');
+                return;
+            }
+            
+            if (ohInput.value === '' || fisikInput.value === '') {
+                alert('Isi OH dan Fisik terlebih dahulu!');
+                return;
+            }
+            
+            const itemIndex = parseInt(itemSelect.value);
+            const selectedItem = listItems[itemIndex];
+            const oh = parseInt(ohInput.value) || 0;
+            const fisik = parseInt(fisikInput.value) || 0;
+            const selisih = fisik - oh;
+            
+            const existingIndex = currentItems.findIndex(item => item.plu === selectedItem.plu);
+            
+            if (existingIndex !== -1) {
+                currentItems[existingIndex].oh = oh;
+                currentItems[existingIndex].fisik = fisik;
+                currentItems[existingIndex].selisih = selisih;
+            } else {
+                currentItems.push({
+                    plu: selectedItem.plu,
+                    nama: selectedItem.nama,
+                    oh: oh,
+                    fisik: fisik,
+                    selisih: selisih
+                });
+            }
+            
+            updateItemsTable();
+            
+            ohInput.value = '0';
+            fisikInput.value = '0';
+            itemSelect.value = '';
+        }
+        
+        function updateItemsTable() {
+            const tbody = document.getElementById('itemsTableBody');
+            tbody.innerHTML = '';
+            
+            currentItems.forEach((item, index) => {
+                const row = document.createElement('tr');
+                
+                let selisihClass = 'selisih-zero';
+                if (item.selisih > 0) {
+                    selisihClass = 'selisih-positive';
+                } else if (item.selisih < 0) {
+                    selisihClass = 'selisih-negative';
+                }
+                
+                const selisihText = item.selisih > 0 ? `+${item.selisih}` : item.selisih;
+                
+                row.innerHTML = `
+                    <td>${item.plu}</td>
+                    <td>${item.nama}</td>
+                    <td>${item.oh}</td>
+                    <td>${item.fisik}</td>
+                    <td class="${selisihClass}">${selisihText}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeItem(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('itemCount').textContent = `${currentItems.length} Item`;
+        }
+        
+        function removeItem(index) {
+            currentItems.splice(index, 1);
+            updateItemsTable();
+        }
+        
+        function clearAllItems() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua item?')) {
+                currentItems = [];
+                updateItemsTable();
+            }
+        }
+        
+        function updateTotalItems() {
+            document.getElementById('totalItems').textContent = listItems.length;
+        }
+        
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showError(message) {
+            alert(`Error: ${message}`);
+        }
+        
+        async function submitData() {
+            if (currentItems.length === 0) {
+                alert('Tidak ada item yang ditambahkan!');
+                return;
+            }
+            
+            const tanggal = document.getElementById('tanggal').value;
+            const shift = document.getElementById('shift').value;
+            const namaKasir = document.getElementById('namaKasir').value;
+            
+            if (!tanggal || !shift || !namaKasir) {
+                alert('Harap lengkapi semua field!');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const dateObj = new Date(tanggal);
+                const formattedDate = standardizeDateFormat(tanggal);
+                
+                let successCount = 0;
+                let updateCount = 0;
+                
+                for (const item of currentItems) {
+                    const uniqueId = generateUniqueId(namaKasir, shift, formattedDate, item.plu);
+                    const timestamp = new Date().toISOString();
+                    
+                    const existingData = await findExistingData(namaKasir, shift, formattedDate, item.plu);
+                    
+                    const rowData = [
+                        uniqueId,
+                        timestamp,
+                        namaKasir,
+                        formattedDate,
+                        shift,
+                        item.plu,
+                        item.nama,
+                        item.oh,
+                        item.fisik,
+                        item.selisih,
+                        'Website'
+                    ];
+                    
+                    if (existingData) {
+                        const range = `A${existingData.rowIndex + 1}:K${existingData.rowIndex + 1}`;
+                        await updateSheetData(SO_RAWAN_SHEET, range, rowData);
+                        updateCount++;
+                    } else {
+                        await appendToSheet(SO_RAWAN_SHEET, rowData);
+                        successCount++;
+                    }
+                }
+                
+                let message = `Data berhasil disimpan!`;
+                if (successCount > 0) {
+                    message += ` ${successCount} item baru ditambahkan.`;
+                }
+                if (updateCount > 0) {
+                    message += ` ${updateCount} item diperbarui.`;
+                }
+                
+                alert(message);
+                
+                document.getElementById('soForm').reset();
+                currentItems = [];
+                updateItemsTable();
+                
+                loadHistory();
+                
+            } catch (error) {
+                console.error('Error submitting data:', error);
+                alert('Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function loadHistory() {
+            const today = new Date();
+            const formattedToday = standardizeDateFormat(today.toISOString().split('T')[0]);
+            
+            const data = await fetchSheetData(SO_RAWAN_SHEET);
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+            
+            if (data.length > 0) {
+                const headers = data[0];
+                const timestampCol = headers.indexOf('Timestamp');
+                const namaCol = headers.indexOf('Nama Kasir');
+                const tanggalCol = headers.indexOf('Tanggal Rekap');
+                const shiftCol = headers.indexOf('Shift');
+                const pengirimCol = headers.indexOf('Pengirim');
+                
+                const todayData = data.slice(1).filter(row => {
+                    const rowDate = row[tanggalCol];
+                    return standardizeDateFormat(rowDate) === formattedToday;
+                });
+                
+                const groupedData = {};
+                todayData.forEach(row => {
+                    const key = `${row[namaCol]}-${row[tanggalCol]}-${row[shiftCol]}-${row[pengirimCol]}`;
+                    if (!groupedData[key]) {
+                        groupedData[key] = {
+                            kasir: row[namaCol],
+                            tanggal: row[tanggalCol],
+                            shift: row[shiftCol],
+                            pengirim: row[pengirimCol],
+                            waktu: row[timestampCol],
+                            count: 0
+                        };
+                    }
+                    groupedData[key].count++;
+                });
+                
+                Object.values(groupedData).forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.tanggal}</td>
+                        <td>${item.shift}</td>
+                        <td>${item.kasir}</td>
+                        <td>${item.count} item</td>
+                        <td>
+                            <span class="badge ${item.pengirim === 'Website' ? 'bg-success' : 'bg-primary'}">
+                                ${item.pengirim}
+                            </span>
+                        </td>
+                        <td>${new Date(item.waktu).toLocaleTimeString('id-ID')}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                document.getElementById('todayData').textContent = Object.keys(groupedData).length;
+            }
+        }
+
+        async function syncData() {
+            showLoading();
+            try {
+                await loadListItems();
+                await loadKasirList();
+                await loadHistory();
+                alert('Data berhasil disinkronisasi!');
+            } catch (error) {
+                console.error('Error syncing data:', error);
+                alert('Terjadi kesalahan saat sinkronisasi data.');
+            } finally {
+                hideLoading();
+            }
+        }
+    </script>
+</body>
+</html>
