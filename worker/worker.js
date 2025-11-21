@@ -1,200 +1,54 @@
-// worker/worker.js
-import { GoogleSpreadsheet } from 'google-spreadsheet';
+import { SignJWT } from "jose";
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-};
+async function getAccessToken(env) {
+  const key = env.PRIVATE_KEY.replace(/\\n/g, "\n");
+  const privateKey = await crypto.subtle.importKey(
+    "pkcs8",
+    new TextEncoder().encode(key),
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const now = Math.floor(Date.now() / 1000);
+  const jwt = await new SignJWT({
+    iss: env.SERVICE_ACCOUNT_EMAIL,
+    scope: "https://www.googleapis.com/auth/spreadsheets",
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3600,
+  })
+    .setProtectedHeader({ alg: "RS256" })
+    .sign(privateKey);
 
-async function handleOptions(request) {
-    return new Response(null, {
-        headers: corsHeaders,
-    });
-}
-
-async function handleGet(request, env) {
-    const url = new URL(request.url);
-    const sheetName = url.searchParams.get('sheetName');
-    const range = url.searchParams.get('range');
-
-    if (!sheetName) {
-        return new Response(JSON.stringify({ error: 'sheetName is required' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-    }
-
-    try {
-        const doc = new GoogleSpreadsheet(env.SPREADSHEET_ID);
-        
-        await doc.useServiceAccountAuth({
-            client_email: env.SERVICE_ACCOUNT_EMAIL,
-            private_key: env.PRIVATE_KEY.replace(/\\n/g, '\n'),
-        });
-
-        await doc.loadInfo();
-        
-        const sheet = doc.sheetsByTitle[sheetName];
-        if (!sheet) {
-            return new Response(JSON.stringify({ error: `Sheet ${sheetName} not found` }), {
-                status: 404,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-        }
-
-        const rows = await sheet.getRows();
-        const values = rows.map(row => row._rawData);
-
-        // Add header row
-        const headerRow = sheet.headerValues || [];
-        values.unshift(headerRow);
-
-        return new Response(JSON.stringify({ values }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-    } catch (error) {
-        console.error('Error fetching sheet data:', error);
-        return new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-    }
-}
-
-async function handleAppend(request, env) {
-    try {
-        const { sheetName, values } = await request.json();
-
-        if (!sheetName || !values) {
-            return new Response(JSON.stringify({ error: 'sheetName and values are required' }), {
-                status: 400,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-        }
-
-        const doc = new GoogleSpreadsheet(env.SPREADSHEET_ID);
-        
-        await doc.useServiceAccountAuth({
-            client_email: env.SERVICE_ACCOUNT_EMAIL,
-            private_key: env.PRIVATE_KEY.replace(/\\n/g, '\n'),
-        });
-
-        await doc.loadInfo();
-        
-        const sheet = doc.sheetsByTitle[sheetName];
-        if (!sheet) {
-            return new Response(JSON.stringify({ error: `Sheet ${sheetName} not found` }), {
-                status: 404,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-        }
-
-        await sheet.addRow(values);
-
-        return new Response(JSON.stringify({ success: true }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-    } catch (error) {
-        console.error('Error appending to sheet:', error);
-        return new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-    }
-}
-
-async function handleUpdate(request, env) {
-    try {
-        const { sheetName, range, values } = await request.json();
-
-        if (!sheetName || !range || !values) {
-            return new Response(JSON.stringify({ error: 'sheetName, range and values are required' }), {
-                status: 400,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-        }
-
-        const doc = new GoogleSpreadsheet(env.SPREADSHEET_ID);
-        
-        await doc.useServiceAccountAuth({
-            client_email: env.SERVICE_ACCOUNT_EMAIL,
-            private_key: env.PRIVATE_KEY.replace(/\\n/g, '\n'),
-        });
-
-        await doc.loadInfo();
-        
-        const sheet = doc.sheetsByTitle[sheetName];
-        if (!sheet) {
-            return new Response(JSON.stringify({ error: `Sheet ${sheetName} not found` }), {
-                status: 404,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-        }
-
-        // Untuk update, kita akan menggunakan approach yang lebih sederhana
-        // dengan mencari row berdasarkan ID dan mengupdate secara manual
-        const rows = await sheet.getRows();
-        
-        // Cari row yang sesuai (asumsi ID ada di kolom pertama)
-        const targetRow = rows.find(row => row._rawData[0] === values[0]);
-        
-        if (targetRow) {
-            // Update setiap field
-            const headers = sheet.headerValues;
-            for (let i = 0; i < headers.length; i++) {
-                if (values[i] !== undefined) {
-                    targetRow[headers[i]] = values[i];
-                }
-            }
-            await targetRow.save();
-        } else {
-            return new Response(JSON.stringify({ error: 'Row not found' }), {
-                status: 404,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-        }
-
-        return new Response(JSON.stringify({ success: true }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-    } catch (error) {
-        console.error('Error updating sheet:', error);
-        return new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-    }
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion: jwt,
+    }),
+  });
+  const data = await res.json();
+  return data.access_token;
 }
 
 export default {
-    async fetch(request, env, ctx) {
-        if (request.method === 'OPTIONS') {
-            return handleOptions(request);
-        }
+  async fetch(request, env) {
+    const token = await getAccessToken(env);
+    const url = new URL(request.url);
+    const sheetId = env.SPREADSHEET_ID;
 
-        const url = new URL(request.url);
-        const path = url.pathname;
+    if (url.pathname === "/api/sheets" && request.method === "GET") {
+      const sheetName = url.searchParams.get("sheetName") || "Sheet1";
+      const res = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A1:Z1000`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return new Response(await res.text(), {
+        headers: { "content-type": "application/json" },
+      });
+    }
 
-        try {
-            if (path === '/api/sheets' && request.method === 'GET') {
-                return await handleGet(request, env);
-            } else if (path === '/api/sheets/append' && request.method === 'POST') {
-                return await handleAppend(request, env);
-            } else if (path === '/api/sheets/update' && request.method === 'PUT') {
-                return await handleUpdate(request, env);
-            } else {
-                return new Response(JSON.stringify({ error: 'Not found' }), {
-                    status: 404,
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                });
-            }
-        } catch (error) {
-            console.error('Error handling request:', error);
-            return new Response(JSON.stringify({ error: 'Internal server error' }), {
-                status: 500,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-        }
-    },
+    return new Response("Worker aktif — coba /api/sheets?sheetName=List_so");
+  },
 };
