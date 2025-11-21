@@ -1,31 +1,33 @@
-# SO Rawan Hilang - Stock Opname System
+# Rekap SO Rawan Hilang
 
-Sistem input data Stock Opname barang rawan hilang dengan integrasi Google Sheets dan WhatsApp Bot.
+Sistem input data Stock Opname barang rawan hilang yang terintegrasi dengan WhatsApp Bot dan Google Sheets.
+
+## 🌐 Live Demo
+
+- **Website**: https://saefullah695.github.io/so-rawan-website/
+- **Worker API**: https://so-rawan-hilang-worker.saefullah695.workers.dev/
 
 ## Fitur
-- Input data SO rawan hilang
-- Integrasi dengan Google Sheets
-- Sinkronisasi dengan WhatsApp Bot
-- Antarmuka responsive
-- Validasi data duplikat
+
+- ✅ Input data SO via Web Interface
+- ✅ Terintegrasi dengan Google Sheets
+- ✅ Sinkronisasi data dengan WhatsApp Bot
+- ✅ Update data existing (UPSERT)
+- ✅ Riwayat input harian
+- ✅ Responsive design dengan Bootstrap
+- ✅ Multi-input support
 
 ## Teknologi
-- HTML5, CSS3, JavaScript
-- Bootstrap 5.3.0
-- Font Awesome 6.4.0
-- Crypto-JS 4.1.1
-- Cloudflare Worker
-- Google Sheets API
 
-## Setup
-1. Clone repository ini
-2. Deploy Cloudflare Worker (lihat worker/README.md)
-3. Konfigurasi Google Service Account
-4. Update SPREADSHEET_ID dan WORKER_URL di index.html
+- **Frontend**: HTML, CSS, JavaScript, Bootstrap
+- **Backend**: Cloudflare Workers
+- **Database**: Google Sheets
+- **Authentication**: Google Service Account
 
 ## Deployment
-- Frontend: Hosting static (Netlify, Vercel, GitHub Pages)
-- Backend: Cloudflare Worker
 
-## Kontribusi
-Silakan buat pull request untuk perbaikan dan fitur baru.
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/saefullah695/so-rawan-website.git
+cd so-rawan-website
