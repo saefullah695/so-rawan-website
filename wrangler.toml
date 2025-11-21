@@ -1,24 +1,24 @@
-name = 'so-rawan-website'
-compatibility_date = '2024-01-15'
-compatibility_flags = ['nodejs_compat']
-main = 'worker/worker.js'
+name = "so-rawan-website"
+main = "worker/worker.js"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
 
 [env.development]
 workers_dev = true
 
-[vars]
-SPREADSHEET_ID = 'your-spreadsheet-id-here'
-SERVICE_ACCOUNT_EMAIL = 'your-service-account@project.iam.gserviceaccount.com'
-NODE_ENV = 'development'
+[env.development.vars]
+SPREADSHEET_ID = "your-spreadsheet-id-here"
+SERVICE_ACCOUNT_EMAIL = "your-service-account@project.iam.gserviceaccount.com"
+NODE_ENV = "development"
 
 [env.production]
 workers_dev = false
-zone_id = 'your-zone-id-here'
+zone_id = "your-zone-id-here"
 routes = [
-  'api.yourdomain.com/*'
+  "api.yourdomain.com/*"
 ]
 
-[vars]
-SPREADSHEET_ID = 'your-spreadsheet-id-here'
-SERVICE_ACCOUNT_EMAIL = 'your-service-account@project.iam.gserviceaccount.com'
-NODE_ENV = 'production'
+[env.production.vars]
+SPREADSHEET_ID = "your-spreadsheet-id-here"
+SERVICE_ACCOUNT_EMAIL = "your-service-account@project.iam.gserviceaccount.com"
+NODE_ENV = "production"
