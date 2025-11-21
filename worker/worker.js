@@ -10,7 +10,7 @@ export default {
     if (path === "/") {
       try {
         // Mengembalikan HTML response
-        const htmlResponse = await fetch('https://raw.githubusercontent.com/your-username/so-rawan-hilang/main/index.html');
+        const htmlResponse = await fetch('https://raw.githubusercontent.com/saefullah695/so-rawan-website/main/index.html');
         if (htmlResponse.ok) {
           return new Response(await htmlResponse.text(), {
             headers: { 
