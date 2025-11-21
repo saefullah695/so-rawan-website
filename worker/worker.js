@@ -1,16 +1,7 @@
 // Worker.js — Rekap SO Rawan Hilang
 // Menyajikan index.html di root (/) dan menyediakan API untuk Google Sheets
 
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    const path = url.pathname;
-
-    // ✅ Halaman utama (index.html)
-    if (path === "/") {
-      // Return HTML content directly
-      const htmlContent = `
-<!DOCTYPE html>
+const HTML_CONTENT = `<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -141,6 +132,11 @@ export default {
             gap: 10px;
             flex-wrap: wrap;
         }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+        }
     </style>
 </head>
 <body>
@@ -211,11 +207,11 @@ export default {
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="oh" class="form-label">OH (On Hand)</label>
-                                <input type="number" class="form-control" id="oh" value="0" min="0">
+                                <input type="number" class="form-control" id="oh" value="0" min="0" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="fisik" class="form-label">Fisik</label>
-                                <input type="number" class="form-control" id="fisik" value="0" min="0">
+                                <input type="number" class="form-control" id="fisik" value="0" min="0" required>
                             </div>
                         </div>
                         
@@ -240,7 +236,7 @@ export default {
                         </div>
                     </div>
                     
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                         <table class="table table-striped table-hover">
                             <thead>
                                 <tr>
@@ -319,8 +315,8 @@ export default {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Konfigurasi - GANTI DENGAN MILIK ANDA
-        const WORKER_URL = 'https://your-worker.your-domain.workers.dev'; // Ganti dengan URL Worker Anda
+        // Konfigurasi - SESUAIKAN DENGAN WORKER ANDA
+        const WORKER_URL = 'https://so-rawan-hilang-worker.saefullah695.workers.dev';
         
         // Nama worksheet - HARUS SAMA DENGAN BOT WHATSAPP
         const LIST_SO_SHEET = 'List_so';
@@ -345,15 +341,15 @@ export default {
             try {
                 let dateObj;
                 
-                if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                if (dateString.match(/^\\d{4}-\\d{2}-\\d{2}$/)) {
                     // Format YYYY-MM-DD (dari input date)
                     const [year, month, day] = dateString.split('-');
                     dateObj = new Date(year, month - 1, day);
-                } else if (dateString.match(/^\d{2}-\d{2}-\d{4}$/)) {
+                } else if (dateString.match(/^\\d{2}-\\d{2}-\\d{4}$/)) {
                     // Format DD-MM-YYYY
                     const [day, month, year] = dateString.split('-');
                     dateObj = new Date(year, month - 1, day);
-                } else if (dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                } else if (dateString.match(/^\\d{2}\\/\\d{2}\\/\\d{4}$/)) {
                     // Format DD/MM/YYYY
                     const [day, month, year] = dateString.split('/');
                     dateObj = new Date(year, month - 1, day);
@@ -366,7 +362,7 @@ export default {
                     const day = String(dateObj.getDate()).padStart(2, '0');
                     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                     const year = dateObj.getFullYear();
-                    return `${day}-${month}-${year}`;
+                    return \`\${day}-\${month}-\${year}\`;
                 }
                 
                 return dateString;
@@ -378,25 +374,25 @@ export default {
         
         // Fungsi untuk mengambil data dari Google Sheets melalui Worker
         async function fetchSheetData(sheetName, range = '') {
-            const url = `${WORKER_URL}/api/sheets?sheetName=${encodeURIComponent(sheetName)}&range=${encodeURIComponent(range)}`;
+            const url = \`\${WORKER_URL}/api/sheets?sheetName=\${encodeURIComponent(sheetName)}&range=\${encodeURIComponent(range)}\`;
             
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(\`HTTP error! status: \${response.status}\`);
                 }
                 const data = await response.json();
                 return data.values || [];
             } catch (error) {
-                console.error(`Error fetching data from ${sheetName}:`, error);
-                showError(`Gagal mengambil data dari ${sheetName}`);
+                console.error(\`Error fetching data from \${sheetName}:\`, error);
+                showError(\`Gagal mengambil data dari \${sheetName}\`);
                 return [];
             }
         }
         
         // Fungsi untuk mengirim data ke Google Sheets melalui Worker
         async function appendToSheet(sheetName, data) {
-            const url = `${WORKER_URL}/api/sheets/append`;
+            const url = \`\${WORKER_URL}/api/sheets/append\`;
             
             try {
                 const response = await fetch(url, {
@@ -411,19 +407,19 @@ export default {
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(\`HTTP error! status: \${response.status}\`);
                 }
                 
                 return await response.json();
             } catch (error) {
-                console.error(`Error appending data to ${sheetName}:`, error);
+                console.error(\`Error appending data to \${sheetName}:\`, error);
                 throw error;
             }
         }
 
         // Fungsi untuk update data di Google Sheets melalui Worker
         async function updateSheetData(sheetName, range, data) {
-            const url = `${WORKER_URL}/api/sheets/update`;
+            const url = \`\${WORKER_URL}/api/sheets/update\`;
             
             try {
                 const response = await fetch(url, {
@@ -439,12 +435,12 @@ export default {
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(\`HTTP error! status: \${response.status}\`);
                 }
                 
                 return await response.json();
             } catch (error) {
-                console.error(`Error updating data in ${sheetName}:`, error);
+                console.error(\`Error updating data in \${sheetName}:\`, error);
                 throw error;
             }
         }
@@ -452,38 +448,52 @@ export default {
         // Fungsi untuk memuat data item dari worksheet List_so
         async function loadListItems() {
             showLoading();
-            const data = await fetchSheetData(LIST_SO_SHEET);
-            
-            if (data.length > 0) {
-                // Skip header row
-                listItems = data.slice(1).map(row => ({
-                    plu: row[0] || '',
-                    nama: row[1] || ''
-                })).filter(item => item.plu && item.nama); // Filter item yang valid
+            try {
+                const data = await fetchSheetData(LIST_SO_SHEET);
                 
-                updateItemSelect();
-                updateTotalItems();
-                hideLoading();
-            } else {
-                console.error('Tidak ada data item ditemukan');
+                if (data && data.length > 0) {
+                    // Skip header row
+                    listItems = data.slice(1)
+                        .map(row => ({
+                            plu: (row[0] || '').toString().trim(),
+                            nama: (row[1] || '').toString().trim()
+                        }))
+                        .filter(item => item.plu && item.nama); // Filter item yang valid
+                    
+                    updateItemSelect();
+                    updateTotalItems();
+                } else {
+                    console.warn('Tidak ada data item ditemukan atau data kosong');
+                    listItems = [];
+                    updateItemSelect();
+                    updateTotalItems();
+                }
+            } catch (error) {
+                console.error('Error loading list items:', error);
+                showError('Gagal memuat daftar item');
+            } finally {
                 hideLoading();
             }
         }
         
         // Fungsi untuk memuat data kasir dari worksheet Absensi
         async function loadKasirList() {
-            const data = await fetchSheetData(ABSENSI_SHEET);
-            
-            if (data.length > 0) {
-                // Skip header row, ambil kolom nama (asumsi kolom kedua)
-                kasirList = [...new Set(data.slice(1)
-                    .map(row => row[1] || '')
-                    .filter(name => name.trim() !== ''))];
+            try {
+                const data = await fetchSheetData(ABSENSI_SHEET);
+                
+                if (data && data.length > 0) {
+                    // Skip header row, ambil kolom nama (asumsi kolom kedua)
+                    kasirList = [...new Set(data.slice(1)
+                        .map(row => (row[1] || '').toString().trim())
+                        .filter(name => name !== ''))];
+                } else {
+                    console.warn('Tidak ada data kasir ditemukan');
+                    kasirList = ['Kasir 1', 'Kasir 2', 'Kasir 3']; // Fallback
+                }
                 
                 updateKasirSelect();
-            } else {
-                console.error('Tidak ada data kasir ditemukan');
-                // Fallback kasir list
+            } catch (error) {
+                console.error('Error loading kasir list:', error);
                 kasirList = ['Kasir 1', 'Kasir 2', 'Kasir 3'];
                 updateKasirSelect();
             }
@@ -492,12 +502,14 @@ export default {
         // Fungsi untuk memperbarui dropdown item
         function updateItemSelect() {
             const select = document.getElementById('itemSelect');
+            if (!select) return;
+            
             select.innerHTML = '<option value="">Pilih Item Barang</option>';
             
             listItems.forEach((item, index) => {
                 const option = document.createElement('option');
                 option.value = index;
-                option.textContent = `${item.plu} - ${item.nama}`;
+                option.textContent = \`\${item.plu} - \${item.nama}\`;
                 select.appendChild(option);
             });
         }
@@ -505,6 +517,8 @@ export default {
         // Fungsi untuk memperbarui dropdown kasir
         function updateKasirSelect() {
             const select = document.getElementById('namaKasir');
+            if (!select) return;
+            
             select.innerHTML = '<option value="">Pilih Nama Kasir</option>';
             
             kasirList.forEach(kasir => {
@@ -521,7 +535,7 @@ export default {
             const ohInput = document.getElementById('oh');
             const fisikInput = document.getElementById('fisik');
             
-            if (itemSelect.value === '') {
+            if (!itemSelect || itemSelect.value === '') {
                 alert('Pilih item terlebih dahulu!');
                 return;
             }
@@ -535,6 +549,11 @@ export default {
             }
             
             const itemIndex = parseInt(itemSelect.value);
+            if (isNaN(itemIndex) || itemIndex < 0 || itemIndex >= listItems.length) {
+                alert('Item yang dipilih tidak valid!');
+                return;
+            }
+            
             const selectedItem = listItems[itemIndex];
             const selisih = fisik - oh;
             
@@ -571,12 +590,15 @@ export default {
         // Fungsi untuk memperbarui tabel item
         function updateItemsTable() {
             const tbody = document.getElementById('itemsTableBody');
+            if (!tbody) return;
+            
             tbody.innerHTML = '';
             
             if (currentItems.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="6" class="text-center text-muted">Belum ada item yang ditambahkan</td>`;
+                row.innerHTML = '<td colspan="6" class="text-center text-muted">Belum ada item yang ditambahkan</td>';
                 tbody.appendChild(row);
+                document.getElementById('itemCount').textContent = '0 Item';
                 return;
             }
             
@@ -590,32 +612,34 @@ export default {
                     selisihClass = 'selisih-negative';
                 }
                 
-                const selisihText = item.selisih > 0 ? `+${item.selisih}` : item.selisih;
+                const selisihText = item.selisih > 0 ? \`+\${item.selisih}\` : item.selisih;
                 
-                row.innerHTML = `
-                    <td>${item.plu}</td>
-                    <td>${item.nama}</td>
-                    <td>${item.oh}</td>
-                    <td>${item.fisik}</td>
-                    <td class="${selisihClass}">${selisihText}</td>
+                row.innerHTML = \`
+                    <td>\${item.plu}</td>
+                    <td>\${item.nama}</td>
+                    <td>\${item.oh}</td>
+                    <td>\${item.fisik}</td>
+                    <td class="\${selisihClass}">\${selisihText}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="removeItem(${index})">
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeItem(\${index})">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
-                `;
+                \`;
                 
                 tbody.appendChild(row);
             });
             
             // Update item count
-            document.getElementById('itemCount').textContent = `${currentItems.length} Item`;
+            document.getElementById('itemCount').textContent = \`\${currentItems.length} Item\`;
         }
         
         // Fungsi untuk menghapus item dari tabel
         function removeItem(index) {
-            currentItems.splice(index, 1);
-            updateItemsTable();
+            if (index >= 0 && index < currentItems.length) {
+                currentItems.splice(index, 1);
+                updateItemsTable();
+            }
         }
         
         // Fungsi untuk menghapus semua item
@@ -638,24 +662,26 @@ export default {
         
         // Fungsi untuk menampilkan loading
         function showLoading() {
-            document.getElementById('loading').style.display = 'block';
+            const loading = document.getElementById('loading');
+            if (loading) loading.style.display = 'block';
         }
         
         // Fungsi untuk menyembunyikan loading
         function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
+            const loading = document.getElementById('loading');
+            if (loading) loading.style.display = 'none';
         }
 
         // Fungsi untuk menampilkan error
         function showError(message) {
-            alert(`Error: ${message}`);
+            alert(\`Error: \${message}\`);
         }
         
         // Fungsi untuk mencari data existing di SoRawan worksheet
         async function findExistingData(nama, shift, tanggal, plu) {
             try {
                 const data = await fetchSheetData(SO_RAWAN_SHEET);
-                if (data.length < 2) return null;
+                if (!data || data.length < 2) return null;
                 
                 const headers = data[0];
                 const idColumn = headers.indexOf('ID');
@@ -731,7 +757,7 @@ export default {
                         const existingData = await findExistingData(namaKasir, shift, formattedDate, item.plu);
                         
                         if (existingData) {
-                            const range = `A${existingData.rowIndex}:K${existingData.rowIndex}`;
+                            const range = \`A\${existingData.rowIndex}:K\${existingData.rowIndex}\`;
                             await updateSheetData(SO_RAWAN_SHEET, range, rowData);
                             updateCount++;
                         } else {
@@ -739,15 +765,15 @@ export default {
                             successCount++;
                         }
                     } catch (error) {
-                        console.error(`Error processing item ${item.plu}:`, error);
+                        console.error(\`Error processing item \${item.plu}:\`, error);
                         errorCount++;
                     }
                 }
                 
                 let message = 'Data berhasil disimpan!';
-                if (successCount > 0) message += ` ${successCount} item baru ditambahkan.`;
-                if (updateCount > 0) message += ` ${updateCount} item diperbarui.`;
-                if (errorCount > 0) message += ` ${errorCount} item gagal diproses.`;
+                if (successCount > 0) message += \` \${successCount} item baru ditambahkan.\`;
+                if (updateCount > 0) message += \` \${updateCount} item diperbarui.\`;
+                if (errorCount > 0) message += \` \${errorCount} item gagal diproses.\`;
                 
                 alert(message);
                 
@@ -771,85 +797,95 @@ export default {
         
         // Fungsi untuk memuat riwayat input hari ini
         async function loadHistory() {
-            const today = new Date();
-            const formattedToday = standardizeDateFormat(today.toISOString().split('T')[0]);
-            
-            const data = await fetchSheetData(SO_RAWAN_SHEET);
-            const tbody = document.getElementById('historyTableBody');
-            tbody.innerHTML = '';
-            
-            if (data.length <= 1) {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="6" class="text-center text-muted">Belum ada data untuk hari ini</td>`;
-                tbody.appendChild(row);
-                document.getElementById('todayData').textContent = '0';
-                return;
-            }
-            
-            const headers = data[0];
-            const timestampCol = headers.indexOf('Timestamp');
-            const namaCol = headers.indexOf('Nama Kasir');
-            const tanggalCol = headers.indexOf('Tanggal Rekap');
-            const shiftCol = headers.indexOf('Shift');
-            const pengirimCol = headers.indexOf('Pengirim');
-            
-            // Validasi kolom
-            if (timestampCol === -1 || namaCol === -1 || tanggalCol === -1 || shiftCol === -1) {
-                console.error('Struktur kolom tidak sesuai');
-                return;
-            }
-            
-            const todayData = data.slice(1).filter(row => {
-                const rowDate = standardizeDateFormat(row[tanggalCol]);
-                return rowDate === formattedToday;
-            });
-            
-            // Kelompokkan data
-            const groupedData = {};
-            todayData.forEach(row => {
-                const key = `${row[namaCol]}-${row[tanggalCol]}-${row[shiftCol]}`;
-                if (!groupedData[key]) {
-                    groupedData[key] = {
-                        kasir: row[namaCol],
-                        tanggal: row[tanggalCol],
-                        shift: row[shiftCol],
-                        pengirim: row[pengirimCol] || 'Unknown',
-                        waktu: row[timestampCol],
-                        count: 0
-                    };
-                }
-                groupedData[key].count++;
-            });
-            
-            const groups = Object.values(groupedData);
-            
-            if (groups.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="6" class="text-center text-muted">Belum ada data untuk hari ini</td>`;
-                tbody.appendChild(row);
-            } else {
-                groups.forEach(item => {
+            try {
+                const today = new Date();
+                const formattedToday = standardizeDateFormat(today.toISOString().split('T')[0]);
+                
+                const data = await fetchSheetData(SO_RAWAN_SHEET);
+                const tbody = document.getElementById('historyTableBody');
+                if (!tbody) return;
+                
+                tbody.innerHTML = '';
+                
+                if (!data || data.length <= 1) {
                     const row = document.createElement('tr');
-                    const waktu = new Date(item.waktu);
-                    const waktuText = isNaN(waktu.getTime()) ? 'Invalid Date' : waktu.toLocaleTimeString('id-ID');
-                    
-                    row.innerHTML = `
-                        <td>${item.tanggal}</td>
-                        <td>${item.shift}</td>
-                        <td>${item.kasir}</td>
-                        <td>${item.count} item</td>
-                        <td>
-                            <span class="badge ${item.pengirim === 'Website' ? 'bg-success' : 'bg-primary'}">
-                                ${item.pengirim}
-                            </span>
-                        </td>
-                        <td>${waktuText}</td>
-                    `;
+                    row.innerHTML = '<td colspan="6" class="text-center text-muted">Belum ada data untuk hari ini</td>';
                     tbody.appendChild(row);
+                    document.getElementById('todayData').textContent = '0';
+                    return;
+                }
+                
+                const headers = data[0];
+                const timestampCol = headers.indexOf('Timestamp');
+                const namaCol = headers.indexOf('Nama Kasir');
+                const tanggalCol = headers.indexOf('Tanggal Rekap');
+                const shiftCol = headers.indexOf('Shift');
+                const pengirimCol = headers.indexOf('Pengirim');
+                
+                // Validasi kolom
+                if (timestampCol === -1 || namaCol === -1 || tanggalCol === -1 || shiftCol === -1) {
+                    console.error('Struktur kolom tidak sesuai');
+                    return;
+                }
+                
+                const todayData = data.slice(1).filter(row => {
+                    const rowDate = standardizeDateFormat(row[tanggalCol]);
+                    return rowDate === formattedToday;
                 });
+                
+                // Kelompokkan data
+                const groupedData = {};
+                todayData.forEach(row => {
+                    const key = \`\${row[namaCol]}-\${row[tanggalCol]}-\${row[shiftCol]}\`;
+                    if (!groupedData[key]) {
+                        groupedData[key] = {
+                            kasir: row[namaCol],
+                            tanggal: row[tanggalCol],
+                            shift: row[shiftCol],
+                            pengirim: row[pengirimCol] || 'Unknown',
+                            waktu: row[timestampCol],
+                            count: 0
+                        };
+                    }
+                    groupedData[key].count++;
+                });
+                
+                const groups = Object.values(groupedData);
+                
+                if (groups.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="6" class="text-center text-muted">Belum ada data untuk hari ini</td>';
+                    tbody.appendChild(row);
+                } else {
+                    groups.forEach(item => {
+                        const row = document.createElement('tr');
+                        const waktu = new Date(item.waktu);
+                        const waktuText = isNaN(waktu.getTime()) ? 'Invalid Date' : waktu.toLocaleTimeString('id-ID');
+                        
+                        row.innerHTML = \`
+                            <td>\${item.tanggal}</td>
+                            <td>\${item.shift}</td>
+                            <td>\${item.kasir}</td>
+                            <td>\${item.count} item</td>
+                            <td>
+                                <span class="badge \${item.pengirim === 'Website' ? 'bg-success' : 'bg-primary'}">
+                                    \${item.pengirim}
+                                </span>
+                            </td>
+                            <td>\${waktuText}</td>
+                        \`;
+                        tbody.appendChild(row);
+                    });
+                }
+                
+                document.getElementById('todayData').textContent = groups.length;
+            } catch (error) {
+                console.error('Error loading history:', error);
+                const tbody = document.getElementById('historyTableBody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Gagal memuat riwayat</td></tr>';
+                }
             }
-            
-            document.getElementById('todayData').textContent = groups.length;
         }
 
         // Fungsi untuk sinkronisasi data
@@ -892,12 +928,25 @@ export default {
                     addItemToTable();
                 }
             });
+
+            // Auto-focus pada item select setelah load
+            setTimeout(() => {
+                const itemSelect = document.getElementById('itemSelect');
+                if (itemSelect) itemSelect.focus();
+            }, 1000);
         });
     </script>
 </body>
 </html>`;
-      
-      return new Response(htmlContent, {
+
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    // ✅ Halaman utama (index.html)
+    if (path === "/") {
+      return new Response(HTML_CONTENT, {
         headers: { 
           "Content-Type": "text/html; charset=utf-8",
           "Cache-Control": "no-cache"
