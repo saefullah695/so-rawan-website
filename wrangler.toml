@@ -1,8 +1,20 @@
-name = "so-rawan-hilang-worker"
+name = "so-rawan-worker"
 compatibility_date = "2023-10-01"
+compatibility_flags = [ "nodejs_compat" ]
 
+# Environment variables
 [vars]
-SPREADSHEET_ID = "your-spreadsheet-id"
+SPREADSHEET_ID = "your-spreadsheet-id-here"
+SERVICE_ACCOUNT_EMAIL = "your-service-account-email@project.iam.gserviceaccount.com"
 
-[[env.production.vars]]
-SPREADSHEET_ID = "your-spreadsheet-id"
+# Secrets (set using wrangler secret put)
+# PRIVATE_KEY will be set as secret
+
+[env.production]
+workers_dev = false
+zone_id = "your-zone-id"
+route = "api.yourdomain.com/*"
+
+# Untuk development
+[env.development]
+workers_dev = true
