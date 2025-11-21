@@ -1,0 +1,14 @@
+{
+  "name": "so-rawan-worker",
+  "version": "1.0.0",
+  "description": "Worker untuk SO Rawan Hilang",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
