@@ -1,11 +1,11 @@
-// worker/worker.js
+// worker.js
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 
-// Configuration
+// Configuration - GANTI DENGAN DOMAIN ANDA
 const CONFIG = {
     MAX_ROWS: 1000,
     CACHE_TTL: 300000, // 5 minutes
-    ALLOWED_ORIGINS: ['https://yourdomain.com', 'http://localhost:3000']
+    ALLOWED_ORIGINS: ['https://so-rawan-website.saefullah695.workers.dev', 'http://localhost:3000', 'https://yourdomain.com']
 };
 
 // CORS headers dengan origin validation
@@ -13,8 +13,12 @@ function getCorsHeaders(request) {
     const origin = request.headers.get('Origin');
     const allowedOrigins = CONFIG.ALLOWED_ORIGINS;
     
+    // Allow current domain dan development origins
+    const currentOrigin = 'https://so-rawan-website.saefullah695.workers.dev';
+    const allowed = allowedOrigins.includes(origin) ? origin : currentOrigin;
+    
     return {
-        'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : allowedOrigins[0],
+        'Access-Control-Allow-Origin': allowed,
         'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Max-Age': '86400',
@@ -73,7 +77,7 @@ function validateEmail(email) {
 
 function sanitizeInput(input) {
     if (typeof input !== 'string') return '';
-    return input.trim().slice(0, 100); // Limit input length
+    return input.trim().slice(0, 100);
 }
 
 async function getAuthenticatedDoc(env) {
@@ -186,14 +190,6 @@ async function handleAppend(request, env) {
 
     if (!Array.isArray(values) || values.length === 0) {
         return new Response(JSON.stringify({ error: 'Values must be a non-empty array' }), {
-            status: 400,
-            headers: { ...getCorsHeaders(request), 'Content-Type': 'application/json' },
-        });
-    }
-
-    // Validate values array
-    if (values.some(value => typeof value === 'object' && value !== null)) {
-        return new Response(JSON.stringify({ error: 'Values must be primitive types only' }), {
             status: 400,
             headers: { ...getCorsHeaders(request), 'Content-Type': 'application/json' },
         });
@@ -328,6 +324,62 @@ async function handleUpdate(request, env) {
     }
 }
 
+// Handler untuk root path
+async function handleRoot(request) {
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Google Sheets API Worker</title>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+            .endpoint { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+            code { background: #eee; padding: 2px 5px; border-radius: 3px; }
+        </style>
+    </head>
+    <body>
+        <h1>Google Sheets API Worker</h1>
+        <p>Worker berjalan dengan baik! Gunakan endpoint berikut untuk mengakses Google Sheets:</p>
+        
+        <div class="endpoint">
+            <h3>GET Data</h3>
+            <p><code>GET /api/sheets?sheetName=YourSheetName&limit=50&offset=0</code></p>
+        </div>
+        
+        <div class="endpoint">
+            <h3>POST Data (Append)</h3>
+            <p><code>POST /api/sheets/append</code></p>
+            <pre>{
+    "sheetName": "YourSheet",
+    "values": ["Data1", "Data2", "Data3"]
+}</pre>
+        </div>
+        
+        <div class="endpoint">
+            <h3>PUT Data (Update)</h3>
+            <p><code>PUT /api/sheets/update</code></p>
+            <pre>{
+    "sheetName": "YourSheet",
+    "keyColumn": "email",
+    "keyValue": "user@example.com",
+    "updates": {
+        "name": "New Name",
+        "status": "active"
+    }
+}</pre>
+        </div>
+    </body>
+    </html>
+    `;
+
+    return new Response(html, {
+        headers: {
+            'Content-Type': 'text/html',
+            ...getCorsHeaders(request)
+        }
+    });
+}
+
 export default {
     async fetch(request, env, ctx) {
         if (request.method === 'OPTIONS') {
@@ -336,6 +388,11 @@ export default {
 
         const url = new URL(request.url);
         const path = url.pathname;
+
+        // Handle root path
+        if (path === '/' && request.method === 'GET') {
+            return handleRoot(request);
+        }
 
         try {
             if (path === '/api/sheets' && request.method === 'GET') {
