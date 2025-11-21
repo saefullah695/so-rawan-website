@@ -1,14 +1,25 @@
 {
-  "name": "so-rawan-worker",
+  "name": "so-rawan-website",
   "version": "1.0.0",
-  "description": "Worker untuk SO Rawan Hilang",
-  "main": "worker.js",
+  "description": "Website untuk input data SO Rawan Hilang terintegrasi dengan Google Sheets",
+  "main": "worker/worker.js",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "build": "echo 'No build step required'"
   },
-  "dependencies": {},
+  "dependencies": {
+    "google-spreadsheet": "^4.1.1"
+  },
   "devDependencies": {
     "wrangler": "^3.0.0"
-  }
+  },
+  "keywords": [
+    "google-sheets",
+    "stock-opname",
+    "cloudflare-workers",
+    "cloudflare-pages"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
 }
