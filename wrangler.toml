@@ -1,0 +1,8 @@
+name = "so-rawan-hilang-worker"
+compatibility_date = "2023-10-01"
+
+[vars]
+SPREADSHEET_ID = "your-spreadsheet-id"
+
+[[env.production.vars]]
+SPREADSHEET_ID = "your-spreadsheet-id"
