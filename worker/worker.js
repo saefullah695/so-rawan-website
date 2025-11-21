@@ -1,7 +1,6 @@
 // worker/worker.js
-const { GoogleSpreadsheet } = require('google-spreadsheet');
+import { GoogleSpreadsheet } from 'google-spreadsheet';
 
-// CORS headers
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
@@ -133,33 +132,28 @@ async function handleUpdate(request, env) {
             });
         }
 
-        // Parse range (format: A1:B2)
-        const rangeMatch = range.match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/);
-        if (!rangeMatch) {
-            return new Response(JSON.stringify({ error: 'Invalid range format' }), {
-                status: 400,
+        // Untuk update, kita akan menggunakan approach yang lebih sederhana
+        // dengan mencari row berdasarkan ID dan mengupdate secara manual
+        const rows = await sheet.getRows();
+        
+        // Cari row yang sesuai (asumsi ID ada di kolom pertama)
+        const targetRow = rows.find(row => row._rawData[0] === values[0]);
+        
+        if (targetRow) {
+            // Update setiap field
+            const headers = sheet.headerValues;
+            for (let i = 0; i < headers.length; i++) {
+                if (values[i] !== undefined) {
+                    targetRow[headers[i]] = values[i];
+                }
+            }
+            await targetRow.save();
+        } else {
+            return new Response(JSON.stringify({ error: 'Row not found' }), {
+                status: 404,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             });
         }
-
-        const startCol = rangeMatch[1];
-        const startRow = parseInt(rangeMatch[2]);
-        const endCol = rangeMatch[3];
-        const endRow = parseInt(rangeMatch[4]);
-
-        // Load cells for the range
-        await sheet.loadCells(`${range}`);
-
-        // Update cells
-        for (let row = startRow; row <= endRow; row++) {
-            for (let col = columnToIndex(startCol); col <= columnToIndex(endCol); col++) {
-                const cell = sheet.getCell(row - 1, col); // Sheets are 0-indexed
-                const valueIndex = (row - startRow) * (columnToIndex(endCol) - columnToIndex(startCol) + 1) + (col - columnToIndex(startCol));
-                cell.value = values[valueIndex];
-            }
-        }
-
-        await sheet.saveUpdatedCells();
 
         return new Response(JSON.stringify({ success: true }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -173,17 +167,8 @@ async function handleUpdate(request, env) {
     }
 }
 
-// Helper function to convert column letter to index (A=0, B=1, etc.)
-function columnToIndex(column) {
-    let index = 0;
-    for (let i = 0; i < column.length; i++) {
-        index = index * 26 + (column.charCodeAt(i) - 'A'.charCodeAt(0) + 1);
-    }
-    return index - 1;
-}
-
 export default {
-    async fetch(request, env) {
+    async fetch(request, env, ctx) {
         if (request.method === 'OPTIONS') {
             return handleOptions(request);
         }
