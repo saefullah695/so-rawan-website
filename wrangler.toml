@@ -9,3 +9,16 @@ workers_dev = true
 [vars]
 SPREADSHEET_ID = 'your-spreadsheet-id-here'
 SERVICE_ACCOUNT_EMAIL = 'your-service-account@project.iam.gserviceaccount.com'
+NODE_ENV = 'development'
+
+[env.production]
+workers_dev = false
+zone_id = 'your-zone-id-here'
+routes = [
+  'api.yourdomain.com/*'
+]
+
+[vars]
+SPREADSHEET_ID = 'your-spreadsheet-id-here'
+SERVICE_ACCOUNT_EMAIL = 'your-service-account@project.iam.gserviceaccount.com'
+NODE_ENV = 'production'
