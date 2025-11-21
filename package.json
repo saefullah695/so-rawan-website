@@ -6,13 +6,15 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
+    "deploy:prod": "wrangler deploy --env production",
+    "preview": "wrangler dev --env development",
     "build": "echo 'No build step required'"
   },
   "dependencies": {
     "google-spreadsheet": "^4.1.1"
   },
   "devDependencies": {
-    "wrangler": "^3.0.0"
+    "wrangler": "^3.15.0"
   },
   "keywords": [
     "google-sheets",
