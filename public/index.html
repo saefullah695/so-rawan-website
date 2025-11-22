@@ -165,9 +165,9 @@
                             <label for="shift" class="form-label">Shift</label>
                             <select class="form-select" id="shift" required>
                                 <option value="">Pilih Shift</option>
-                                <option value="Pagi">Pagi</option>
-                                <option value="Siang">Siang</option>
-                                <option value="Malam">Malam</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
                             </select>
                         </div>
                     </div>
@@ -281,8 +281,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Konfigurasi - Akan diisi otomatis dari environment variables
-        const WORKER_URL = '{{WORKER_URL}}'; // Akan diganti saat deploy
+        // Konfigurasi - URL Worker yang benar
+        const WORKER_URL = 'https://so-rawan-website.pages.dev';
         
         // Nama worksheet - HARUS SAMA DENGAN BOT WHATSAPP
         const LIST_SO_SHEET = 'List_so';
@@ -341,15 +341,17 @@
             const url = `${WORKER_URL}/api/sheets?sheetName=${encodeURIComponent(sheetName)}&range=${encodeURIComponent(range)}`;
             
             try {
+                console.log(`Fetching data from: ${url}`);
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
+                console.log(`Data fetched from ${sheetName}:`, data);
                 return data.values || [];
             } catch (error) {
                 console.error(`Error fetching data from ${sheetName}:`, error);
-                showError(`Gagal mengambil data dari ${sheetName}`);
+                showError(`Gagal mengambil data dari ${sheetName}: ${error.message}`);
                 return [];
             }
         }
@@ -414,7 +416,7 @@
             showLoading();
             const data = await fetchSheetData(LIST_SO_SHEET);
             
-            if (data.length > 0) {
+            if (data && data.length > 0) {
                 listItems = data.slice(1).map(row => ({
                     plu: row[0] || '',
                     nama: row[1] || ''
@@ -424,7 +426,8 @@
                 updateTotalItems();
                 hideLoading();
             } else {
-                console.error('Tidak ada data item ditemukan');
+                console.error('Tidak ada data item ditemukan atau data kosong');
+                showError('Tidak ada data item ditemukan');
                 hideLoading();
             }
         }
@@ -433,13 +436,14 @@
         async function loadKasirList() {
             const data = await fetchSheetData(ABSENSI_SHEET);
             
-            if (data.length > 0) {
+            if (data && data.length > 0) {
                 // Mengambil kolom NAMA (indeks 1) dari worksheet Absensi
                 kasirList = [...new Set(data.slice(1).map(row => row[1] || '').filter(name => name))];
                 
                 updateKasirSelect();
             } else {
                 console.error('Tidak ada data kasir ditemukan');
+                showError('Tidak ada data kasir ditemukan');
             }
         }
         
@@ -588,7 +592,7 @@
         async function findExistingData(nama, shift, tanggal, plu) {
             try {
                 const data = await fetchSheetData(SO_RAWAN_SHEET);
-                if (data.length < 2) return null;
+                if (!data || data.length < 2) return null;
                 
                 const headers = data[0];
                 const idColumn = headers.indexOf('ID');
@@ -635,7 +639,6 @@
             showLoading();
             
             try {
-                const dateObj = new Date(tanggal);
                 const formattedDate = standardizeDateFormat(tanggal);
                 
                 let successCount = 0;
@@ -663,10 +666,10 @@
                     
                     if (existingData) {
                         const range = `A${existingData.rowIndex + 1}:K${existingData.rowIndex + 1}`;
-                        await updateSheetData(SO_RAWAN_SHEET, range, rowData);
+                        await updateSheetData(SO_RAWAN_SHEET, range, [rowData]);
                         updateCount++;
                     } else {
-                        await appendToSheet(SO_RAWAN_SHEET, rowData);
+                        await appendToSheet(SO_RAWAN_SHEET, [rowData]);
                         successCount++;
                     }
                 }
@@ -704,7 +707,7 @@
             const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '';
             
-            if (data.length > 0) {
+            if (data && data.length > 0) {
                 const headers = data[0];
                 const timestampCol = headers.indexOf('Timestamp');
                 const namaCol = headers.indexOf('Nama Kasir');
@@ -775,10 +778,10 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('tanggal').value = today;
             
-            loadListItems();
-            loadKasirList();
-            loadHistory();
+            // Load data saat halaman pertama kali dibuka
+            syncData();
             
+            // Event listeners
             document.getElementById('addItemBtn').addEventListener('click', addItemToTable);
             document.getElementById('soForm').addEventListener('submit', function(e) {
                 e.preventDefault();
