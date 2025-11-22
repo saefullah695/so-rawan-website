@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekap SO Rawan Hilang - 2GC6 BAROS PANDEGLANG</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -140,14 +142,17 @@
 
         .stat-card.primary .stat-icon {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
         .stat-card.success .stat-icon {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
         }
 
         .stat-card.warning .stat-icon {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
         }
 
         .stat-value {
@@ -575,6 +580,21 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
+
+        /* Selisih styles */
+        .selisih-positive {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .selisih-negative {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .selisih-zero {
+            color: #6c757d;
+        }
     </style>
 </head>
 <body>
@@ -605,12 +625,12 @@
                 </div>
                 <div class="stat-card success">
                     <div class="stat-icon">✅</div>
-                    <div class="stat-value" id="todayItems">0</div>
+                    <div class="stat-value" id="todayData">0</div>
                     <div class="stat-label">Input Hari Ini</div>
                 </div>
                 <div class="stat-card warning">
                     <div class="stat-icon">🔔</div>
-                    <div class="stat-value" id="selectedItems">0</div>
+                    <div class="stat-value" id="itemCount">0</div>
                     <div class="stat-label">Item Dipilih</div>
                 </div>
             </div>
@@ -633,7 +653,7 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem;">
                         <span style="font-weight: 600;">🔄 Status Sinkronisasi</span>
-                        <span class="badge badge-success">Aktif</span>
+                        <span id="syncStatus" class="badge badge-success">Aktif</span>
                     </div>
                 </div>
             </div>
@@ -664,12 +684,12 @@
                 
                 <div class="form-group">
                     <label class="form-label">📅 Tanggal Rekap</label>
-                    <input type="date" class="form-control" id="tanggalRekap">
+                    <input type="date" class="form-control" id="tanggal" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">🔄 Shift</label>
-                    <select class="form-select" id="shiftSelect">
+                    <select class="form-select" id="shift" required>
                         <option value="">Pilih Shift</option>
                         <option value="1">Shift 1</option>
                         <option value="2">Shift 2</option>
@@ -679,7 +699,7 @@
 
                 <div class="form-group">
                     <label class="form-label">👤 Nama Kasir</label>
-                    <select class="form-select" id="kasirSelect">
+                    <select class="form-select" id="namaKasir" required>
                         <option value="">Pilih Nama Kasir</option>
                     </select>
                 </div>
@@ -690,28 +710,50 @@
                         <option value="">Pilih Item Barang</option>
                     </select>
                 </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">📊 OH (On Hand)</label>
+                        <input type="number" class="form-control" id="oh" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📋 Fisik</label>
+                        <input type="number" class="form-control" id="fisik" value="0" min="0">
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="addItemBtn">
+                        <i class="fas fa-plus me-1"></i>Tambah Item
+                    </button>
+                    <button class="btn btn-danger" id="clearBtn">
+                        <i class="fas fa-trash me-1"></i>Hapus Semua
+                    </button>
+                    <button class="btn btn-secondary" id="refreshBtn">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
             </div>
 
             <!-- Item Details -->
             <div class="card">
                 <div class="card-header">📋 Daftar Item yang Dipilih</div>
-                <div id="itemList">
+                <div id="itemsTableBody">
                     <div class="empty-state">
                         <div class="empty-state-icon">📦</div>
                         <p>Belum ada item yang dipilih</p>
                     </div>
                 </div>
-                <div class="btn-group" style="margin-top: 1rem;">
-                    <button class="btn btn-primary" onclick="addItem()">➕ Tambah Item</button>
-                    <button class="btn btn-danger" onclick="clearAllItems()">🗑️ Hapus Semua</button>
-                    <button class="btn btn-secondary" onclick="refreshData()">🔄 Refresh</button>
-                </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="btn-group">
-                <button class="btn btn-success btn-block" onclick="saveData()">💾 Simpan Data</button>
-                <button class="btn btn-primary btn-block" onclick="syncData()">☁️ Sinkronisasi Data</button>
+                <button class="btn btn-success btn-block" onclick="submitData()">
+                    <i class="fas fa-paper-plane me-2"></i>Simpan Data
+                </button>
+                <button class="btn btn-primary btn-block" id="syncBtn">
+                    <i class="fas fa-sync me-2"></i>Sinkronisasi Data
+                </button>
             </div>
         </div>
 
@@ -719,7 +761,7 @@
         <div id="history" class="tab-content">
             <div class="card">
                 <div class="card-header">📋 Riwayat Input Hari Ini</div>
-                <div id="historyList">
+                <div id="historyTableBody">
                     <div class="empty-state">
                         <div class="empty-state-icon">📭</div>
                         <p>Belum ada riwayat input hari ini</p>
@@ -778,38 +820,675 @@
     </div>
 
     <script>
-        // Global Variables
-        let itemsData = [];
-        let selectedItems = [];
+        // Konfigurasi - URL Worker yang benar
+        const WORKER_URL = 'https://so-rawan-website.saefullah695.workers.dev';
+        
+        // Nama worksheet - HARUS SAMA DENGAN BOT WHATSAPP
+        const LIST_SO_SHEET = 'List_so';
+        const ABSENSI_SHEET = 'Absensi';
+        const SO_RAWAN_SHEET = 'SoRawan';
+        
+        // Variabel global
+        let listItems = [];
+        let kasirList = [];
+        let currentItems = [];
         let historyData = [];
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
-        });
-
-        function initializeApp() {
-            // Set default date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('tanggalRekap').value = today;
-            document.getElementById('filterStartDate').value = today;
-            document.getElementById('filterEndDate').value = today;
-
-            // Load initial data
-            loadInitialData();
+        
+        // Fungsi generateUniqueId - SAMA DENGAN BOT WHATSAPP
+        function generateUniqueId(...args) {
+            const hash = CryptoJS.MD5(args.join('-')).toString();
+            return hash;
         }
-
-        function updateDateTime() {
-            const now = new Date();
-            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        
+        // Fungsi standardizeDateFormat - SAMA DENGAN BOT WHATSAPP
+        function standardizeDateFormat(dateString) {
+            if (!dateString) return '';
             
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', dateOptions);
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString('id-ID', timeOptions);
+            try {
+                let dateObj;
+                
+                if (dateString.match(/^\d{2}-\d{2}-\d{4}$/)) {
+                    const [day, month, year] = dateString.split('-');
+                    dateObj = new Date(`${year}-${month}-${day}`);
+                }
+                else if (dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                    const [day, month, year] = dateString.split('/');
+                    dateObj = new Date(`${year}-${month}-${day}`);
+                }
+                else if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    dateObj = new Date(dateString);
+                }
+                else {
+                    dateObj = new Date(dateString);
+                }
+                
+                if (!isNaN(dateObj.getTime())) {
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const year = dateObj.getFullYear();
+                    return `${day}-${month}-${year}`;
+                }
+                
+                return dateString;
+            } catch (error) {
+                console.error('Error standardize date:', error);
+                return dateString;
+            }
+        }
+        
+        // Fungsi untuk mengambil data dari Google Sheets melalui Worker
+        async function fetchSheetData(sheetName, range = '') {
+            const url = `${WORKER_URL}/api/sheets?sheetName=${encodeURIComponent(sheetName)}&range=${encodeURIComponent(range)}`;
+            
+            try {
+                console.log(`Fetching data from: ${url}`);
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log(`Data fetched from ${sheetName}:`, data);
+                return data.values || [];
+            } catch (error) {
+                console.error(`Error fetching data from ${sheetName}:`, error);
+                showError(`Gagal mengambil data dari ${sheetName}: ${error.message}`);
+                return [];
+            }
+        }
+        
+        // Fungsi untuk mengirim data ke Google Sheets melalui Worker
+        async function appendToSheet(sheetName, data) {
+            const url = `${WORKER_URL}/api/sheets/append`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sheetName: sheetName,
+                        values: data
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error(`Error appending data to ${sheetName}:`, error);
+                throw error;
+            }
         }
 
+        // Fungsi untuk update data di Google Sheets melalui Worker
+        async function updateSheetData(sheetName, range, data) {
+            const url = `${WORKER_URL}/api/sheets/update`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sheetName: sheetName,
+                        range: range,
+                        values: data
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error(`Error updating data in ${sheetName}:`, error);
+                throw error;
+            }
+        }
+        
+        // Fungsi untuk memuat data item dari worksheet List_so
+        async function loadListItems() {
+            showLoading();
+            const data = await fetchSheetData(LIST_SO_SHEET);
+            
+            if (data && data.length > 0) {
+                listItems = data.slice(1).map(row => ({
+                    plu: row[0] || '',
+                    nama: row[1] || ''
+                }));
+                
+                updateItemSelect();
+                updateTotalItems();
+                hideLoading();
+            } else {
+                console.error('Tidak ada data item ditemukan atau data kosong');
+                showError('Tidak ada data item ditemukan');
+                hideLoading();
+            }
+        }
+        
+        // Fungsi untuk memuat data kasir dari worksheet Absensi
+        async function loadKasirList() {
+            const data = await fetchSheetData(ABSENSI_SHEET);
+            
+            if (data && data.length > 0) {
+                // Mengambil kolom NAMA (indeks 1) dari worksheet Absensi
+                kasirList = [...new Set(data.slice(1).map(row => row[1] || '').filter(name => name))];
+                
+                updateKasirSelect();
+            } else {
+                console.error('Tidak ada data kasir ditemukan');
+                showError('Tidak ada data kasir ditemukan');
+            }
+        }
+        
+        // Fungsi untuk memperbarui dropdown item
+        function updateItemSelect() {
+            const select = document.getElementById('itemSelect');
+            select.innerHTML = '<option value="">Pilih Item Barang</option>';
+            
+            listItems.forEach((item, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${item.plu} - ${item.nama}`;
+                select.appendChild(option);
+            });
+        }
+        
+        // Fungsi untuk memperbarui dropdown kasir
+        function updateKasirSelect() {
+            const select = document.getElementById('namaKasir');
+            select.innerHTML = '<option value="">Pilih Nama Kasir</option>';
+            
+            kasirList.forEach(kasir => {
+                const option = document.createElement('option');
+                option.value = kasir;
+                option.textContent = kasir;
+                select.appendChild(option);
+            });
+        }
+        
+        // Fungsi untuk menambah item ke tabel
+        function addItemToTable() {
+            const itemSelect = document.getElementById('itemSelect');
+            const ohInput = document.getElementById('oh');
+            const fisikInput = document.getElementById('fisik');
+            
+            if (itemSelect.value === '') {
+                alert('Pilih item terlebih dahulu!');
+                return;
+            }
+            
+            if (ohInput.value === '' || fisikInput.value === '') {
+                alert('Isi OH dan Fisik terlebih dahulu!');
+                return;
+            }
+            
+            const itemIndex = parseInt(itemSelect.value);
+            const selectedItem = listItems[itemIndex];
+            const oh = parseInt(ohInput.value) || 0;
+            const fisik = parseInt(fisikInput.value) || 0;
+            const selisih = fisik - oh;
+            
+            const existingIndex = currentItems.findIndex(item => item.plu === selectedItem.plu);
+            
+            if (existingIndex !== -1) {
+                currentItems[existingIndex].oh = oh;
+                currentItems[existingIndex].fisik = fisik;
+                currentItems[existingIndex].selisih = selisih;
+            } else {
+                currentItems.push({
+                    plu: selectedItem.plu,
+                    nama: selectedItem.nama,
+                    oh: oh,
+                    fisik: fisik,
+                    selisih: selisih
+                });
+            }
+            
+            updateItemsTable();
+            
+            ohInput.value = '0';
+            fisikInput.value = '0';
+            itemSelect.value = '';
+        }
+        
+        // Fungsi untuk memperbarui tabel item
+        function updateItemsTable() {
+            const tbody = document.getElementById('itemsTableBody');
+            
+            if (currentItems.length === 0) {
+                tbody.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <p>Belum ada item yang dipilih</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            currentItems.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = 'item-row';
+                
+                let selisihClass = 'selisih-zero';
+                if (item.selisih > 0) {
+                    selisihClass = 'selisih-positive';
+                } else if (item.selisih < 0) {
+                    selisihClass = 'selisih-negative';
+                }
+                
+                const selisihText = item.selisih > 0 ? `+${item.selisih}` : item.selisih;
+                
+                row.innerHTML = `
+                    <div class="item-row-header">
+                        <span class="item-number">Item ${index + 1}</span>
+                        <button class="btn btn-danger btn-sm" onclick="removeItem(${index})">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0.75rem;">
+                        <label class="form-label">PLU / Nama Barang</label>
+                        <input type="text" class="form-control" value="${item.plu} - ${item.nama}" readonly>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">OH (On Hand)</label>
+                            <input type="number" class="form-control" value="${item.oh}" readonly>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Fisik</label>
+                            <input type="number" class="form-control" value="${item.fisik}" readonly>
+                        </div>
+                    </div>
+                    <div style="margin-top: 0.75rem; padding: 0.75rem; background: ${getSelisihColor(item.selisih)}; border-radius: 0.5rem; text-align: center; font-weight: 600; color: ${getSelisihTextColor(item.selisih)};">
+                        Selisih: ${selisihText}
+                    </div>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('itemCount').textContent = currentItems.length;
+        }
+        
+        function getSelisihColor(selisih) {
+            if (selisih === 0) return '#d1fae5';
+            if (selisih > 0) return '#fee2e2';
+            return '#fef3c7';
+        }
+        
+        function getSelisihTextColor(selisih) {
+            if (selisih === 0) return '#065f46';
+            if (selisih > 0) return '#991b1b';
+            return '#92400e';
+        }
+        
+        // Fungsi untuk menghapus item dari tabel
+        function removeItem(index) {
+            currentItems.splice(index, 1);
+            updateItemsTable();
+        }
+        
+        // Fungsi untuk menghapus semua item
+        function clearAllItems() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua item?')) {
+                currentItems = [];
+                updateItemsTable();
+            }
+        }
+        
+        // Fungsi untuk memperbarui statistik
+        function updateTotalItems() {
+            document.getElementById('totalItems').textContent = listItems.length;
+        }
+        
+        // Fungsi untuk menampilkan loading
+        function showLoading() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+        }
+        
+        // Fungsi untuk menyembunyikan loading
+        function hideLoading() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+        }
+
+        // Fungsi untuk menampilkan error
+        function showError(message) {
+            alert(`Error: ${message}`);
+        }
+        
+        // Fungsi untuk mencari data existing di SoRawan worksheet
+        async function findExistingData(nama, shift, tanggal, plu) {
+            try {
+                const data = await fetchSheetData(SO_RAWAN_SHEET);
+                if (!data || data.length < 2) return null;
+                
+                const headers = data[0];
+                const idColumn = headers.indexOf('ID');
+                const namaColumn = headers.indexOf('Nama Kasir');
+                const shiftColumn = headers.indexOf('Shift');
+                const tanggalColumn = headers.indexOf('Tanggal Rekap');
+                const pluColumn = headers.indexOf('PLU');
+                
+                const searchId = generateUniqueId(nama, shift, tanggal, plu);
+                
+                for (let i = 1; i < data.length; i++) {
+                    const row = data[i];
+                    if (row[idColumn] === searchId) {
+                        return {
+                            rowIndex: i,
+                            data: row
+                        };
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error finding existing data:', error);
+                return null;
+            }
+        }
+        
+        // Fungsi untuk mengirim data ke Google Sheets
+        async function submitData() {
+            if (currentItems.length === 0) {
+                alert('Tidak ada item yang ditambahkan!');
+                return;
+            }
+            
+            const tanggal = document.getElementById('tanggal').value;
+            const shift = document.getElementById('shift').value;
+            const namaKasir = document.getElementById('namaKasir').value;
+            
+            if (!tanggal || !shift || !namaKasir) {
+                alert('Harap lengkapi semua field!');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const formattedDate = standardizeDateFormat(tanggal);
+                
+                let successCount = 0;
+                let updateCount = 0;
+                
+                for (const item of currentItems) {
+                    const uniqueId = generateUniqueId(namaKasir, shift, formattedDate, item.plu);
+                    const timestamp = new Date().toISOString();
+                    
+                    const existingData = await findExistingData(namaKasir, shift, formattedDate, item.plu);
+                    
+                    const rowData = [
+                        uniqueId,
+                        timestamp,
+                        namaKasir,
+                        formattedDate,
+                        shift,
+                        item.plu,
+                        item.nama,
+                        item.oh,
+                        item.fisik,
+                        item.selisih,
+                        'Website'
+                    ];
+                    
+                    if (existingData) {
+                        const range = `A${existingData.rowIndex + 1}:K${existingData.rowIndex + 1}`;
+                        await updateSheetData(SO_RAWAN_SHEET, range, [rowData]);
+                        updateCount++;
+                    } else {
+                        await appendToSheet(SO_RAWAN_SHEET, [rowData]);
+                        successCount++;
+                    }
+                }
+                
+                let message = `Data berhasil disimpan!`;
+                if (successCount > 0) {
+                    message += ` ${successCount} item baru ditambahkan.`;
+                }
+                if (updateCount > 0) {
+                    message += ` ${updateCount} item diperbarui.`;
+                }
+                
+                alert(message);
+                
+                document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+                document.getElementById('shift').value = '';
+                document.getElementById('namaKasir').value = '';
+                currentItems = [];
+                updateItemsTable();
+                
+                loadHistory();
+                updateRecentActivity();
+                
+            } catch (error) {
+                console.error('Error submitting data:', error);
+                alert('Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Fungsi untuk memuat riwayat input hari ini
+        async function loadHistory() {
+            const today = new Date();
+            const formattedToday = standardizeDateFormat(today.toISOString().split('T')[0]);
+            
+            const data = await fetchSheetData(SO_RAWAN_SHEET);
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+            
+            if (data && data.length > 0) {
+                const headers = data[0];
+                const timestampCol = headers.indexOf('Timestamp');
+                const namaCol = headers.indexOf('Nama Kasir');
+                const tanggalCol = headers.indexOf('Tanggal Rekap');
+                const shiftCol = headers.indexOf('Shift');
+                const pengirimCol = headers.indexOf('Pengirim');
+                
+                const todayData = data.slice(1).filter(row => {
+                    const rowDate = row[tanggalCol];
+                    return standardizeDateFormat(rowDate) === formattedToday;
+                });
+                
+                const groupedData = {};
+                todayData.forEach(row => {
+                    const key = `${row[namaCol]}-${row[tanggalCol]}-${row[shiftCol]}-${row[pengirimCol]}`;
+                    if (!groupedData[key]) {
+                        groupedData[key] = {
+                            kasir: row[namaCol],
+                            tanggal: row[tanggalCol],
+                            shift: row[shiftCol],
+                            pengirim: row[pengirimCol],
+                            waktu: row[timestampCol],
+                            count: 0
+                        };
+                    }
+                    groupedData[key].count++;
+                });
+                
+                if (Object.keys(groupedData).length === 0) {
+                    tbody.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <p>Belum ada riwayat input hari ini</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                Object.values(groupedData).forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'history-item';
+                    
+                    row.innerHTML = `
+                        <div class="history-header">
+                            <span class="history-title">Input oleh ${item.kasir}</span>
+                            <span class="history-time">${new Date(item.waktu).toLocaleTimeString('id-ID')}</span>
+                        </div>
+                        <div class="history-details">
+                            <span>📅 ${item.tanggal}</span>
+                            <span>🔄 Shift ${item.shift}</span>
+                            <span>👤 ${item.kasir}</span>
+                            <span>📦 ${item.count} item</span>
+                            <span class="badge ${item.pengirim === 'Website' ? 'badge-success' : 'badge-primary'}">
+                                ${item.pengirim}
+                            </span>
+                        </div>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+                
+                document.getElementById('todayData').textContent = Object.keys(groupedData).length;
+            } else {
+                tbody.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Belum ada riwayat input hari ini</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Fungsi untuk memperbarui aktivitas terbaru
+        function updateRecentActivity() {
+            const recentActivity = document.getElementById('recentActivity');
+            const historyItems = document.querySelectorAll('#historyTableBody .history-item');
+            
+            if (historyItems.length === 0) {
+                recentActivity.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Belum ada aktivitas hari ini</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Ambil 3 item terbaru
+            const recentItems = Array.from(historyItems).slice(-3).reverse();
+            recentActivity.innerHTML = '';
+            
+            recentItems.forEach(item => {
+                const clonedItem = item.cloneNode(true);
+                recentActivity.appendChild(clonedItem);
+            });
+        }
+
+        // Fungsi untuk sinkronisasi data
+        async function syncData() {
+            showLoading();
+            try {
+                await loadListItems();
+                await loadKasirList();
+                await loadHistory();
+                updateRecentActivity();
+                alert('Data berhasil disinkronisasi!');
+            } catch (error) {
+                console.error('Error syncing data:', error);
+                alert('Terjadi kesalahan saat sinkronisasi data.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Fungsi untuk generate laporan
+        async function generateReport() {
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+
+            if (!startDate || !endDate) {
+                alert('⚠️ Pilih periode tanggal terlebih dahulu!');
+                return;
+            }
+
+            showLoading();
+            
+            try {
+                const data = await fetchSheetData(SO_RAWAN_SHEET);
+                const tbody = document.querySelector('#reportTable tbody');
+                
+                if (!data || data.length < 2) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: var(--text-secondary);">
+                                Tidak ada data untuk ditampilkan
+                            </td>
+                        </tr>
+                    `;
+                    hideLoading();
+                    return;
+                }
+
+                const headers = data[0];
+                const tanggalCol = headers.indexOf('Tanggal Rekap');
+                const shiftCol = headers.indexOf('Shift');
+                const namaCol = headers.indexOf('Nama Kasir');
+                const pluCol = headers.indexOf('PLU');
+                const namaBarangCol = headers.indexOf('Nama Barang');
+                const ohCol = headers.indexOf('OH');
+                const fisikCol = headers.indexOf('Fisik');
+                const selisihCol = headers.indexOf('Selisih');
+
+                const filteredData = data.slice(1).filter(row => {
+                    const rowDate = standardizeDateFormat(row[tanggalCol]);
+                    const start = standardizeDateFormat(startDate);
+                    const end = standardizeDateFormat(endDate);
+                    
+                    return rowDate >= start && rowDate <= end;
+                });
+
+                if (filteredData.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: var(--text-secondary);">
+                                Tidak ada data untuk periode yang dipilih
+                            </td>
+                        </tr>
+                    `;
+                    hideLoading();
+                    return;
+                }
+
+                let rows = '';
+                filteredData.forEach(row => {
+                    const selisih = parseInt(row[selisihCol]) || 0;
+                    rows += `
+                        <tr>
+                            <td>${row[tanggalCol]}</td>
+                            <td>${row[shiftCol]}</td>
+                            <td>${row[namaCol]}</td>
+                            <td>${row[pluCol]}</td>
+                            <td>${row[namaBarangCol]}</td>
+                            <td>${row[ohCol]}</td>
+                            <td>${row[fisikCol]}</td>
+                            <td class="${selisih > 0 ? 'selisih-positive' : selisih < 0 ? 'selisih-negative' : 'selisih-zero'}">
+                                ${selisih > 0 ? '+' : ''}${selisih}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = rows;
+            } catch (error) {
+                console.error('Error generating report:', error);
+                alert('Terjadi kesalahan saat membuat laporan.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Fungsi untuk berpindah tab
         function switchTab(tabName) {
             // Hide all tabs
             const tabs = document.querySelectorAll('.tab-content');
@@ -823,299 +1502,42 @@
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
         }
-
-        function loadInitialData() {
-            // Simulate loading
-            document.getElementById('loadingIndicator').style.display = 'block';
-
-            setTimeout(() => {
-                // Sample data
-                itemsData = [
-                    { plu: '001', nama: 'Rokok Sampoerna Mild', oh: 50 },
-                    { plu: '002', nama: 'Rokok Djarum Super', oh: 45 },
-                    { plu: '003', nama: 'Rokok Gudang Garam', oh: 60 },
-                    { plu: '004', nama: 'Permen Kopiko', oh: 100 },
-                    { plu: '005', nama: 'Coklat Silverqueen', oh: 75 }
-                ];
-
-                const kasirNames = ['Ahmad', 'Budi', 'Citra', 'Dewi', 'Eko'];
-                
-                // Populate kasir dropdown
-                const kasirSelect = document.getElementById('kasirSelect');
-                kasirNames.forEach(name => {
-                    const option = document.createElement('option');
-                    option.value = name;
-                    option.textContent = name;
-                    kasirSelect.appendChild(option);
-                });
-
-                // Populate item dropdown
-                const itemSelect = document.getElementById('itemSelect');
-                itemsData.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.plu;
-                    option.textContent = `${item.plu} - ${item.nama}`;
-                    itemSelect.appendChild(option);
-                });
-
-                updateStats();
-                document.getElementById('loadingIndicator').style.display = 'none';
-            }, 1000);
-        }
-
-        function updateStats() {
-            document.getElementById('totalItems').textContent = itemsData.length;
-            document.getElementById('todayItems').textContent = historyData.length;
-            document.getElementById('selectedItems').textContent = selectedItems.length;
-        }
-
-        function addItem() {
-            const itemPLU = document.getElementById('itemSelect').value;
-            if (!itemPLU) {
-                alert('⚠️ Pilih item terlebih dahulu!');
-                return;
-            }
-
-            const item = itemsData.find(i => i.plu === itemPLU);
-            if (!item) return;
-
-            // Check if item already added
-            if (selectedItems.find(i => i.plu === itemPLU)) {
-                alert('⚠️ Item sudah ditambahkan!');
-                return;
-            }
-
-            selectedItems.push({
-                plu: item.plu,
-                nama: item.nama,
-                oh: item.oh,
-                fisik: 0
-            });
-
-            renderItemList();
-            updateStats();
-        }
-
-        function renderItemList() {
-            const itemList = document.getElementById('itemList');
-            
-            if (selectedItems.length === 0) {
-                itemList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📦</div>
-                        <p>Belum ada item yang dipilih</p>
-                    </div>
-                `;
-                return;
-            }
-
-            itemList.innerHTML = selectedItems.map((item, index) => `
-                <div class="item-row">
-                    <div class="item-row-header">
-                        <span class="item-number">Item ${index + 1}</span>
-                        <button class="btn btn-danger btn-sm" onclick="removeItem(${index})">🗑️ Hapus</button>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0.75rem;">
-                        <label class="form-label">PLU / Nama Barang</label>
-                        <input type="text" class="form-control" value="${item.plu} - ${item.nama}" readonly>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label class="form-label">OH (On Hand)</label>
-                            <input type="number" class="form-control" value="${item.oh}" readonly>
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label class="form-label">Fisik</label>
-                            <input type="number" class="form-control" id="fisik_${index}" 
-                                   value="${item.fisik}" onchange="updateFisik(${index}, this.value)">
-                        </div>
-                    </div>
-                    <div style="margin-top: 0.75rem; padding: 0.75rem; background: ${getSelisihColor(item.oh - item.fisik)}; border-radius: 0.5rem; text-align: center; font-weight: 600;">
-                        Selisih: ${item.oh - item.fisik}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function getSelisihColor(selisih) {
-            if (selisih === 0) return '#d1fae5';
-            if (selisih > 0) return '#fee2e2';
-            return '#fef3c7';
-        }
-
-        function updateFisik(index, value) {
-            selectedItems[index].fisik = parseInt(value) || 0;
-            renderItemList();
-        }
-
-        function removeItem(index) {
-            if (confirm('❓ Hapus item ini?')) {
-                selectedItems.splice(index, 1);
-                renderItemList();
-                updateStats();
-            }
-        }
-
-        function clearAllItems() {
-            if (confirm('❓ Hapus semua item yang dipilih?')) {
-                selectedItems = [];
-                renderItemList();
-                updateStats();
-            }
-        }
-
-        function saveData() {
-            // Validate
-            const tanggal = document.getElementById('tanggalRekap').value;
-            const shift = document.getElementById('shiftSelect').value;
-            const kasir = document.getElementById('kasirSelect').value;
-
-            if (!tanggal || !shift || !kasir) {
-                alert('⚠️ Lengkapi data tanggal, shift, dan kasir!');
-                return;
-            }
-
-            if (selectedItems.length === 0) {
-                alert('⚠️ Belum ada item yang dipilih!');
-                return;
-            }
-
-            // Save to history
+        
+        // Fungsi untuk memperbarui tanggal dan waktu
+        function updateDateTime() {
             const now = new Date();
-            historyData.push({
-                tanggal: tanggal,
-                shift: shift,
-                kasir: kasir,
-                items: [...selectedItems],
-                waktu: now.toLocaleString('id-ID'),
-                pengirim: kasir
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', dateOptions);
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('id-ID', timeOptions);
+        }
+        
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tanggal').value = today;
+            document.getElementById('filterStartDate').value = today;
+            document.getElementById('filterEndDate').value = today;
+            
+            // Update date and time every second
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            // Load data saat halaman pertama kali dibuka
+            syncData();
+            
+            // Event listeners
+            document.getElementById('addItemBtn').addEventListener('click', addItemToTable);
+            document.getElementById('clearBtn').addEventListener('click', clearAllItems);
+            document.getElementById('refreshBtn').addEventListener('click', function() {
+                loadListItems();
+                loadKasirList();
+                loadHistory();
+                updateRecentActivity();
             });
-
-            // Show success message
-            alert('✅ Data berhasil disimpan!');
-
-            // Clear form
-            selectedItems = [];
-            renderItemList();
-            updateStats();
-            renderHistory();
-            updateRecentActivity();
-        }
-
-        function syncData() {
-            alert('☁️ Data berhasil disinkronisasi dengan server!');
-        }
-
-        function refreshData() {
-            if (confirm('🔄 Refresh data? Perubahan yang belum disimpan akan hilang.')) {
-                selectedItems = [];
-                renderItemList();
-                updateStats();
-            }
-        }
-
-        function renderHistory() {
-            const historyList = document.getElementById('historyList');
-            
-            if (historyData.length === 0) {
-                historyList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <p>Belum ada riwayat input hari ini</p>
-                    </div>
-                `;
-                return;
-            }
-
-            historyList.innerHTML = historyData.map((data, index) => `
-                <div class="history-item">
-                    <div class="history-header">
-                        <span class="history-title">Input #${index + 1}</span>
-                        <span class="history-time">${data.waktu}</span>
-                    </div>
-                    <div class="history-details">
-                        <span>📅 ${data.tanggal}</span>
-                        <span>🔄 Shift ${data.shift}</span>
-                        <span>👤 ${data.kasir}</span>
-                        <span>📦 ${data.items.length} item</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function updateRecentActivity() {
-            const recentActivity = document.getElementById('recentActivity');
-            
-            if (historyData.length === 0) {
-                recentActivity.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <p>Belum ada aktivitas hari ini</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const recent = historyData.slice(-3).reverse();
-            recentActivity.innerHTML = recent.map(data => `
-                <div class="history-item">
-                    <div class="history-header">
-                        <span class="history-title">Input oleh ${data.kasir}</span>
-                        <span class="badge badge-success">${data.items.length} item</span>
-                    </div>
-                    <div class="history-details">
-                        <span>⏰ ${data.waktu}</span>
-                        <span>🔄 Shift ${data.shift}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function generateReport() {
-            const startDate = document.getElementById('filterStartDate').value;
-            const endDate = document.getElementById('filterEndDate').value;
-
-            if (!startDate || !endDate) {
-                alert('⚠️ Pilih periode tanggal terlebih dahulu!');
-                return;
-            }
-
-            const tbody = document.querySelector('#reportTable tbody');
-            
-            if (historyData.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" style="text-align: center; color: var(--text-secondary);">
-                            Tidak ada data untuk ditampilkan
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            let rows = '';
-            historyData.forEach(data => {
-                data.items.forEach(item => {
-                    const selisih = item.oh - item.fisik;
-                    rows += `
-                        <tr>
-                            <td>${data.tanggal}</td>
-                            <td>Shift ${data.shift}</td>
-                            <td>${data.kasir}</td>
-                            <td>${item.plu}</td>
-                            <td>${item.nama}</td>
-                            <td>${item.oh}</td>
-                            <td>${item.fisik}</td>
-                            <td style="color: ${selisih === 0 ? 'green' : selisih > 0 ? 'red' : 'orange'}; font-weight: 600;">
-                                ${selisih}
-                            </td>
-                        </tr>
-                    `;
-                });
-            });
-
-            tbody.innerHTML = rows;
-        }
+            document.getElementById('syncBtn').addEventListener('click', syncData);
+        });
     </script>
 </body>
 </html>
