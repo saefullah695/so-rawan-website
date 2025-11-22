@@ -13,13 +13,11 @@ async function handleOptions(request) {
     });
 }
 
-// Helper untuk debug
 function logError(context, error) {
     console.error(`${context}:`, {
         message: error.message,
         stack: error.stack,
         code: error.code,
-        response: error.response
     });
 }
 
@@ -28,7 +26,7 @@ async function handleGet(request, env) {
     const sheetName = url.searchParams.get('sheetName');
     const range = url.searchParams.get('range') || '';
 
-    console.log('Fetching sheet data:', { sheetName, range });
+    console.log('Fetching sheet data:', { sheetName, range, url: request.url });
 
     if (!sheetName) {
         return new Response(JSON.stringify({ error: 'sheetName is required' }), {
@@ -39,18 +37,24 @@ async function handleGet(request, env) {
 
     try {
         // Validasi environment variables
-        if (!env.SPREADSHEET_ID || !env.SERVICE_ACCOUNT_EMAIL || !env.PRIVATE_KEY) {
-            throw new Error('Missing required environment variables');
+        if (!env.SPREADSHEET_ID) {
+            throw new Error('SPREADSHEET_ID is missing');
+        }
+        if (!env.SERVICE_ACCOUNT_EMAIL) {
+            throw new Error('SERVICE_ACCOUNT_EMAIL is missing');
+        }
+        if (!env.PRIVATE_KEY) {
+            throw new Error('PRIVATE_KEY is missing');
         }
 
-        console.log('Initializing Google Spreadsheet with ID:', env.SPREADSHEET_ID);
+        console.log('Environment variables check passed');
         
         const doc = new GoogleSpreadsheet(env.SPREADSHEET_ID);
         
         // Format private key dengan benar
         const privateKey = env.PRIVATE_KEY.replace(/\\n/g, '\n');
         
-        console.log('Authenticating with service account:', env.SERVICE_ACCOUNT_EMAIL);
+        console.log('Authenticating with service account...');
         
         await doc.useServiceAccountAuth({
             client_email: env.SERVICE_ACCOUNT_EMAIL,
@@ -60,14 +64,15 @@ async function handleGet(request, env) {
         console.log('Loading document info...');
         await doc.loadInfo();
         
-        console.log('Available sheets:', doc.sheetsByTitle);
+        console.log('Available sheets:', Object.keys(doc.sheetsByTitle));
         
         const sheet = doc.sheetsByTitle[sheetName];
         if (!sheet) {
-            console.error(`Sheet "${sheetName}" not found. Available sheets:`, Object.keys(doc.sheetsByTitle));
+            const availableSheets = Object.keys(doc.sheetsByTitle);
+            console.error(`Sheet "${sheetName}" not found. Available:`, availableSheets);
             return new Response(JSON.stringify({ 
                 error: `Sheet "${sheetName}" not found`,
-                availableSheets: Object.keys(doc.sheetsByTitle)
+                availableSheets: availableSheets
             }), {
                 status: 404,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -109,7 +114,7 @@ async function handleGet(request, env) {
         return new Response(JSON.stringify({ 
             error: 'Failed to fetch sheet data',
             details: error.message,
-            stack: env.NODE_ENV === 'development' ? error.stack : undefined
+            sheetName: sheetName
         }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -148,17 +153,16 @@ async function handleAppend(request, env) {
             });
         }
 
-        // Pastikan header sudah diload
-        await sheet.loadHeaderRow();
-        
-        // Buat object dari values berdasarkan header
-        const headers = sheet.headerValues;
-        const rowData = {};
+        // Buat object dari values
+        const rowObject = {};
+        const headers = await sheet.headerValues;
         headers.forEach((header, index) => {
-            rowData[header] = values[index] || '';
+            if (values[index] !== undefined) {
+                rowObject[header] = values[index];
+            }
         });
 
-        await sheet.addRow(rowData);
+        await sheet.addRow(rowObject);
 
         return new Response(JSON.stringify({ success: true }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -175,103 +179,48 @@ async function handleAppend(request, env) {
     }
 }
 
-async function handleUpdate(request, env) {
-    try {
-        const { sheetName, rowIndex, values } = await request.json();
-
-        console.log('Updating data:', { sheetName, rowIndex, values });
-
-        if (!sheetName || rowIndex === undefined || !values) {
-            return new Response(JSON.stringify({ error: 'sheetName, rowIndex and values are required' }), {
-                status: 400,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-        }
-
-        const doc = new GoogleSpreadsheet(env.SPREADSHEET_ID);
-        const privateKey = env.PRIVATE_KEY.replace(/\\n/g, '\n');
-        
-        await doc.useServiceAccountAuth({
-            client_email: env.SERVICE_ACCOUNT_EMAIL,
-            private_key: privateKey,
-        });
-
-        await doc.loadInfo();
-        
-        const sheet = doc.sheetsByTitle[sheetName];
-        if (!sheet) {
-            return new Response(JSON.stringify({ error: `Sheet ${sheetName} not found` }), {
-                status: 404,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-        }
-
-        const rows = await sheet.getRows();
-        
-        if (rowIndex < 0 || rowIndex >= rows.length) {
-            return new Response(JSON.stringify({ error: 'Row index out of bounds' }), {
-                status: 400,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-        }
-
-        const targetRow = rows[rowIndex];
-        const headers = sheet.headerValues;
-        
-        // Update each field
-        headers.forEach((header, index) => {
-            if (values[index] !== undefined) {
-                targetRow[header] = values[index];
-            }
-        });
-        
-        await targetRow.save();
-
-        return new Response(JSON.stringify({ success: true }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-    } catch (error) {
-        logError('Error updating sheet', error);
-        return new Response(JSON.stringify({ 
-            error: 'Failed to update data',
-            details: error.message
-        }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-    }
+// Simple health check endpoint
+async function handleHealthCheck() {
+    return new Response(JSON.stringify({ 
+        status: 'ok',
+        message: 'SO Rawan Worker is running',
+        timestamp: new Date().toISOString()
+    }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
 }
 
 export default {
     async fetch(request, env, ctx) {
+        const url = new URL(request.url);
+        const pathname = url.pathname;
+
+        console.log(`Incoming request: ${request.method} ${pathname}`);
+
         // Handle CORS preflight
         if (request.method === 'OPTIONS') {
             return handleOptions(request);
         }
 
-        const url = new URL(request.url);
-        const path = url.pathname;
-
-        try {
-            if (path === '/api/sheets' && request.method === 'GET') {
-                return await handleGet(request, env);
-            } else if (path === '/api/sheets/append' && request.method === 'POST') {
-                return await handleAppend(request, env);
-            } else if (path === '/api/sheets/update' && request.method === 'PUT') {
-                return await handleUpdate(request, env);
-            } else {
-                return new Response(JSON.stringify({ error: 'Endpoint not found' }), {
-                    status: 404,
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                });
-            }
-        } catch (error) {
-            logError('Error handling request', error);
+        // Route requests
+        if (pathname === '/api/sheets' && request.method === 'GET') {
+            return await handleGet(request, env);
+        } else if (pathname === '/api/sheets/append' && request.method === 'POST') {
+            return await handleAppend(request, env);
+        } else if (pathname === '/health' && request.method === 'GET') {
+            return await handleHealthCheck();
+        } else {
+            console.log(`Endpoint not found: ${pathname}`);
             return new Response(JSON.stringify({ 
-                error: 'Internal server error',
-                details: error.message
+                error: 'Endpoint not found',
+                requestedPath: pathname,
+                availableEndpoints: [
+                    'GET /api/sheets?sheetName=...',
+                    'POST /api/sheets/append',
+                    'GET /health'
+                ]
             }), {
-                status: 500,
+                status: 404,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             });
         }
