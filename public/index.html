@@ -673,6 +673,36 @@
         .summary-avg {
             color: #10b981;
         }
+        
+        /* Grouping by date */
+        .date-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .date-header {
+            background: #f1f5f9;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .date-loss-count {
+            background: #ef4444;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+        }
+        
+        .grouped-items {
+            display: grid;
+            gap: 0.75rem;
+        }
     </style>
 </head>
 <body>
@@ -1794,6 +1824,22 @@
                     return;
                 }
 
+                // Urutkan data berdasarkan tanggal dan nama barang
+                filteredData.sort((a, b) => {
+                    // Urutkan berdasarkan tanggal
+                    const dateA = new Date(a[tanggalCol].replace(/'/g, ''));
+                    const dateB = new Date(b[tanggalCol].replace(/'/g, ''));
+                    
+                    if (dateA - dateB !== 0) {
+                        return dateA - dateB;
+                    }
+                    
+                    // Jika tanggal sama, urutkan berdasarkan nama barang
+                    const namaA = a[namaBarangCol] || '';
+                    const namaB = b[namaBarangCol] || '';
+                    return namaA.localeCompare(namaB);
+                });
+
                 // Hitung statistik kehilangan
                 let totalLossValue = 0;
                 let totalLossItems = filteredData.length;
@@ -1811,49 +1857,82 @@
                 document.getElementById('avgLossValue').textContent = avgLossValue;
                 document.getElementById('lossSummary').style.display = 'flex';
 
+                // Kelompokkan data berdasarkan tanggal
+                const groupedByDate = {};
+                filteredData.forEach(row => {
+                    const date = row[tanggalCol];
+                    if (!groupedByDate[date]) {
+                        groupedByDate[date] = [];
+                    }
+                    groupedByDate[date].push(row);
+                });
+
                 // Generate loss report content
                 let lossContent = '';
-                filteredData.forEach((row, index) => {
-                    const selisih = parseInt(row[selisihCol]) || 0;
-                    const lossValue = Math.abs(selisih);
-                    
-                    let comment = '';
-                    if (lossValue <= 5) {
-                        comment = 'Kehilangan ringan. Periksa kemungkinan kesalahan pencatatan atau penempatan barang.';
-                    } else if (lossValue <= 15) {
-                        comment = 'Kehilangan sedang. Perlu dilakukan pengecekan ulang stok dan evaluasi proses penyimpanan.';
-                    } else {
-                        comment = 'Kehilangan signifikan. Perlu investigasi mendalam untuk mengetahui penyebab kehilangan.';
-                    }
+                
+                // Loop melalui setiap tanggal
+                Object.keys(groupedByDate).sort((a, b) => {
+                    const dateA = new Date(a.replace(/'/g, ''));
+                    const dateB = new Date(b.replace(/'/g, ''));
+                    return dateA - dateB;
+                }).forEach(date => {
+                    const itemsForDate = groupedByDate[date];
+                    const dateLossCount = itemsForDate.length;
                     
                     lossContent += `
-                        <div class="loss-card">
-                            <div class="loss-header">
-                                <span class="loss-title">${row[pluCol]} - ${row[namaBarangCol]}</span>
-                                <span class="badge badge-danger">Hilang: ${lossValue} unit</span>
+                        <div class="date-group">
+                            <div class="date-header">
+                                <span>📅 ${date}</span>
+                                <span class="date-loss-count">${dateLossCount} item hilang</span>
                             </div>
-                            <div class="loss-details">
-                                <div>
-                                    <strong>Tanggal:</strong> ${row[tanggalCol]}
+                            <div class="grouped-items">
+                    `;
+                    
+                    // Loop melalui setiap item dalam tanggal tersebut
+                    itemsForDate.forEach((row, index) => {
+                        const selisih = parseInt(row[selisihCol]) || 0;
+                        const lossValue = Math.abs(selisih);
+                        
+                        let comment = '';
+                        if (lossValue <= 5) {
+                            comment = 'Kehilangan ringan. Periksa kemungkinan kesalahan pencatatan atau penempatan barang.';
+                        } else if (lossValue <= 15) {
+                            comment = 'Kehilangan sedang. Perlu dilakukan pengecekan ulang stok dan evaluasi proses penyimpanan.';
+                        } else {
+                            comment = 'Kehilangan signifikan. Perlu investigasi mendalam untuk mengetahui penyebab kehilangan.';
+                        }
+                        
+                        lossContent += `
+                            <div class="loss-card">
+                                <div class="loss-header">
+                                    <span class="loss-title">${row[pluCol]} - ${row[namaBarangCol]}</span>
+                                    <span class="badge badge-danger">Hilang: ${lossValue} pcs</span>
                                 </div>
-                                <div>
-                                    <strong>Shift:</strong> ${row[shiftCol]}
+                                <div class="loss-details">
+                                    <div>
+                                        <strong>Shift:</strong> ${row[shiftCol]}
+                                    </div>
+                                    <div>
+                                        <strong>Kasir:</strong> ${row[namaCol]}
+                                    </div>
+                                    <div>
+                                        <strong>OH:</strong> ${row[ohCol]}
+                                    </div>
+                                    <div>
+                                        <strong>Fisik:</strong> ${row[fisikCol]}
+                                    </div>
+                                    <div>
+                                        <strong>Selisih:</strong> <span class="selisih-negative">${selisih}</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <strong>Kasir:</strong> ${row[namaCol]}
-                                </div>
-                                <div>
-                                    <strong>OH:</strong> ${row[ohCol]}
-                                </div>
-                                <div>
-                                    <strong>Fisik:</strong> ${row[fisikCol]}
-                                </div>
-                                <div>
-                                    <strong>Selisih:</strong> <span class="selisih-negative">${selisih}</span>
+                                <div class="loss-comment">
+                                    <strong>📝 Analisis:</strong> ${comment}
                                 </div>
                             </div>
-                            <div class="loss-comment">
-                                <strong>📝 Analisis:</strong> ${comment}
+                        `;
+                    });
+                    
+                    lossContent += `
                             </div>
                         </div>
                     `;
