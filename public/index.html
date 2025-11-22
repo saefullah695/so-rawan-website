@@ -595,6 +595,84 @@
         .selisih-zero {
             color: #6c757d;
         }
+        
+        /* Report Kehilangan Styles */
+        .loss-card {
+            background: #fff5f5;
+            border-left: 4px solid #ef4444;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .loss-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .loss-title {
+            font-weight: 700;
+            color: #991b1b;
+        }
+        
+        .loss-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .loss-comment {
+            background: #fef2f2;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border-left: 3px solid #f87171;
+            font-size: 0.875rem;
+            color: #7f1d1d;
+        }
+        
+        .loss-summary {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .summary-card {
+            flex: 1;
+            min-width: 150px;
+            background: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        
+        .summary-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .summary-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .summary-total {
+            color: #dc3545;
+        }
+        
+        .summary-items {
+            color: #f59e0b;
+        }
+        
+        .summary-avg {
+            color: #10b981;
+        }
     </style>
 </head>
 <body>
@@ -612,6 +690,7 @@
             <button class="nav-tab" onclick="switchTab('input')">✍️ Input Data</button>
             <button class="nav-tab" onclick="switchTab('history')">📋 Riwayat</button>
             <button class="nav-tab" onclick="switchTab('report')">📈 Laporan</button>
+            <button class="nav-tab" onclick="switchTab('report-kehilangan')">⚠️ Report Kehilangan</button>
         </div>
 
         <!-- Dashboard Tab -->
@@ -808,6 +887,48 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Kehilangan Tab -->
+        <div id="report-kehilangan" class="tab-content">
+            <div class="card">
+                <div class="card-header">⚠️ Laporan Barang Hilang</div>
+                
+                <!-- Filter Options -->
+                <div class="form-group">
+                    <label class="form-label">📅 Filter Periode</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <input type="date" class="form-control" id="lossFilterStartDate">
+                        <input type="date" class="form-control" id="lossFilterEndDate">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="generateLossReport()">📊 Generate Laporan Kehilangan</button>
+
+                <!-- Summary Cards -->
+                <div id="lossSummary" class="loss-summary" style="display: none;">
+                    <div class="summary-card">
+                        <div class="summary-value summary-total" id="totalLossValue">0</div>
+                        <div class="summary-label">Total Kerugian</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-value summary-items" id="totalLossItems">0</div>
+                        <div class="summary-label">Total Item Hilang</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-value summary-avg" id="avgLossValue">0</div>
+                        <div class="summary-label">Rata-rata Kerugian per Item</div>
+                    </div>
+                </div>
+
+                <!-- Loss Report Content -->
+                <div id="lossReportContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>Pilih periode dan klik "Generate Laporan Kehilangan" untuk menampilkan data barang hilang</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1613,6 +1734,140 @@
             }
         }
         
+        // Fungsi untuk generate laporan kehilangan
+        async function generateLossReport() {
+            const startDate = document.getElementById('lossFilterStartDate').value;
+            const endDate = document.getElementById('lossFilterEndDate').value;
+
+            if (!startDate || !endDate) {
+                alert('⚠️ Pilih periode tanggal terlebih dahulu!');
+                return;
+            }
+
+            showLoading();
+            
+            try {
+                const data = await fetchSheetData(SO_RAWAN_SHEET);
+                const content = document.getElementById('lossReportContent');
+                
+                if (!data || data.length < 2) {
+                    content.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📊</div>
+                            <p>Tidak ada data untuk ditampilkan</p>
+                        </div>
+                    `;
+                    hideLoading();
+                    return;
+                }
+
+                const headers = data[0];
+                const tanggalCol = headers.indexOf('Tanggal Rekap');
+                const shiftCol = headers.indexOf('Shift');
+                const namaCol = headers.indexOf('Nama Kasir');
+                const pluCol = headers.indexOf('PLU');
+                const namaBarangCol = headers.indexOf('Nama Barang');
+                const ohCol = headers.indexOf('OH');
+                const fisikCol = headers.indexOf('Fisik');
+                const selisihCol = headers.indexOf('Selisih');
+
+                const filteredData = data.slice(1).filter(row => {
+                    const rowDate = standardizeDateFormat(row[tanggalCol]);
+                    const start = standardizeDateFormat(startDate);
+                    const end = standardizeDateFormat(endDate);
+                    
+                    const selisih = parseInt(row[selisihCol]) || 0;
+                    
+                    return rowDate >= start && rowDate <= end && selisih < 0;
+                });
+
+                if (filteredData.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <p>Tidak ada barang hilang untuk periode yang dipilih</p>
+                            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Selamat! Semua stok tercatat dengan baik.</p>
+                        </div>
+                    `;
+                    document.getElementById('lossSummary').style.display = 'none';
+                    hideLoading();
+                    return;
+                }
+
+                // Hitung statistik kehilangan
+                let totalLossValue = 0;
+                let totalLossItems = filteredData.length;
+                
+                filteredData.forEach(row => {
+                    const selisih = Math.abs(parseInt(row[selisihCol]) || 0);
+                    totalLossValue += selisih;
+                });
+                
+                const avgLossValue = (totalLossValue / totalLossItems).toFixed(2);
+                
+                // Update summary cards
+                document.getElementById('totalLossValue').textContent = totalLossValue;
+                document.getElementById('totalLossItems').textContent = totalLossItems;
+                document.getElementById('avgLossValue').textContent = avgLossValue;
+                document.getElementById('lossSummary').style.display = 'flex';
+
+                // Generate loss report content
+                let lossContent = '';
+                filteredData.forEach((row, index) => {
+                    const selisih = parseInt(row[selisihCol]) || 0;
+                    const lossValue = Math.abs(selisih);
+                    
+                    let comment = '';
+                    if (lossValue <= 5) {
+                        comment = 'Kehilangan ringan. Periksa kemungkinan kesalahan pencatatan atau penempatan barang.';
+                    } else if (lossValue <= 15) {
+                        comment = 'Kehilangan sedang. Perlu dilakukan pengecekan ulang stok dan evaluasi proses penyimpanan.';
+                    } else {
+                        comment = 'Kehilangan signifikan. Perlu investigasi mendalam untuk mengetahui penyebab kehilangan.';
+                    }
+                    
+                    lossContent += `
+                        <div class="loss-card">
+                            <div class="loss-header">
+                                <span class="loss-title">${row[pluCol]} - ${row[namaBarangCol]}</span>
+                                <span class="badge badge-danger">Hilang: ${lossValue} unit</span>
+                            </div>
+                            <div class="loss-details">
+                                <div>
+                                    <strong>Tanggal:</strong> ${row[tanggalCol]}
+                                </div>
+                                <div>
+                                    <strong>Shift:</strong> ${row[shiftCol]}
+                                </div>
+                                <div>
+                                    <strong>Kasir:</strong> ${row[namaCol]}
+                                </div>
+                                <div>
+                                    <strong>OH:</strong> ${row[ohCol]}
+                                </div>
+                                <div>
+                                    <strong>Fisik:</strong> ${row[fisikCol]}
+                                </div>
+                                <div>
+                                    <strong>Selisih:</strong> <span class="selisih-negative">${selisih}</span>
+                                </div>
+                            </div>
+                            <div class="loss-comment">
+                                <strong>📝 Analisis:</strong> ${comment}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                content.innerHTML = lossContent;
+            } catch (error) {
+                console.error('Error generating loss report:', error);
+                alert('Terjadi kesalahan saat membuat laporan kehilangan.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
         // Fungsi untuk berpindah tab
         function switchTab(tabName) {
             // Hide all tabs
@@ -1633,6 +1888,11 @@
                 updateDashboardStats();
             } else if (tabName === 'history') {
                 loadHistory();
+            } else if (tabName === 'report-kehilangan') {
+                // Set default date filters for loss report
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('lossFilterStartDate').value = today;
+                document.getElementById('lossFilterEndDate').value = today;
             }
         }
         
@@ -1652,6 +1912,8 @@
             document.getElementById('tanggal').value = today;
             document.getElementById('filterStartDate').value = today;
             document.getElementById('filterEndDate').value = today;
+            document.getElementById('lossFilterStartDate').value = today;
+            document.getElementById('lossFilterEndDate').value = today;
             
             // Update date and time every second
             updateDateTime();
