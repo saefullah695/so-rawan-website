@@ -42,14 +42,14 @@ async function getGoogleSheet(env) {
 async function handleGet(request, env) {
   const url = new URL(request.url);
   const sheetName = url.searchParams.get("sheetName");
-  const range = url.searchParams.get("range") || '';
   
   if (!sheetName) return jsonResponse({ error: "sheetName is required" }, 400);
 
   try {
     const doc = await getGoogleSheet(env);
     const sheet = doc.sheetsByTitle[sheetName];
-    if (!sheet)
+    
+    if (!sheet) {
       return jsonResponse(
         {
           error: `Sheet "${sheetName}" not found`,
@@ -57,26 +57,60 @@ async function handleGet(request, env) {
         },
         404
       );
-
-    await sheet.loadHeaderRow();
-    const rows = await sheet.getRows();
-    const headers = sheet.headerValues;
-    
-    // Jika range tidak ditentukan, kembalikan semua data
-    let values;
-    if (!range) {
-      values = rows.map((row) => headers.map((h) => row[h] || ""));
-      values.unshift(headers);
-    } else {
-      // Handle range jika diperlukan (untuk kompatibilitas)
-      values = rows.map((row) => headers.map((h) => row[h] || ""));
-      values.unshift(headers);
     }
 
-    return jsonResponse({ success: true, values });
+    // Load cells untuk akses langsung ke data
+    await sheet.loadCells();
+    
+    // Ambil jumlah baris dan kolom yang terisi
+    const rowCount = sheet.rowCount;
+    const colCount = sheet.columnCount;
+    
+    console.log(`Sheet dimensions: ${rowCount} rows x ${colCount} cols`);
+
+    // Baca semua data dari cell
+    const values = [];
+    let lastRowWithData = 0;
+    
+    // Cari baris terakhir yang ada datanya
+    for (let row = 0; row < rowCount; row++) {
+      let hasData = false;
+      for (let col = 0; col < colCount; col++) {
+        const cell = sheet.getCell(row, col);
+        if (cell.value !== null && cell.value !== undefined && cell.value !== '') {
+          hasData = true;
+          lastRowWithData = row;
+          break;
+        }
+      }
+      if (!hasData && row > lastRowWithData + 10) break; // Stop jika 10 baris kosong
+    }
+
+    // Baca data sampai baris terakhir yang ada datanya
+    for (let row = 0; row <= lastRowWithData; row++) {
+      const rowData = [];
+      for (let col = 0; col < colCount; col++) {
+        const cell = sheet.getCell(row, col);
+        rowData.push(cell.value !== null && cell.value !== undefined ? String(cell.value) : "");
+      }
+      values.push(rowData);
+    }
+
+    console.log(`Retrieved ${values.length} rows of data`);
+
+    return jsonResponse({ 
+      success: true, 
+      values,
+      rowCount: values.length,
+      colCount: colCount
+    });
   } catch (error) {
     console.error("Error in handleGet:", error);
-    return jsonResponse({ error: "Failed to fetch sheet data", details: error.message }, 500);
+    return jsonResponse({ 
+      error: "Failed to fetch sheet data", 
+      details: error.message,
+      stack: error.stack 
+    }, 500);
   }
 }
 
@@ -93,28 +127,45 @@ async function handleAppend(request, env) {
     const sheet = doc.sheetsByTitle[sheetName];
     if (!sheet) return jsonResponse({ error: `Sheet ${sheetName} not found` }, 404);
 
+    // Load header row terlebih dahulu
     await sheet.loadHeaderRow();
     const headers = sheet.headerValues;
+
+    if (!headers || headers.length === 0) {
+      return jsonResponse({ 
+        error: "No headers found in sheet. Please ensure row 1 contains headers." 
+      }, 400);
+    }
+
+    console.log("Headers:", headers);
 
     // Handle multiple rows
     if (Array.isArray(values[0])) {
       // Multiple rows
       for (const rowValues of values) {
         const rowData = {};
-        headers.forEach((h, i) => (rowData[h] = rowValues[i] || ""));
+        headers.forEach((h, i) => {
+          rowData[h] = rowValues[i] !== undefined && rowValues[i] !== null ? String(rowValues[i]) : "";
+        });
         await sheet.addRow(rowData);
       }
     } else {
       // Single row
       const rowData = {};
-      headers.forEach((h, i) => (rowData[h] = values[i] || ""));
+      headers.forEach((h, i) => {
+        rowData[h] = values[i] !== undefined && values[i] !== null ? String(values[i]) : "";
+      });
       await sheet.addRow(rowData);
     }
 
     return jsonResponse({ success: true, message: "Row(s) added successfully" });
   } catch (error) {
     console.error("Error in handleAppend:", error);
-    return jsonResponse({ error: "Failed to append data", details: error.message }, 500);
+    return jsonResponse({ 
+      error: "Failed to append data", 
+      details: error.message,
+      stack: error.stack 
+    }, 500);
   }
 }
 
@@ -141,9 +192,7 @@ async function handleUpdate(request, env) {
       return jsonResponse({ error: "Invalid range format. Use format like 'A2:K2'" }, 400);
     }
 
-    const startCol = rangeMatch[1];
     const startRow = parseInt(rangeMatch[2]);
-    const endCol = rangeMatch[3];
     const endRow = parseInt(rangeMatch[4]);
 
     // Validasi: hanya support single row update untuk sekarang
@@ -153,26 +202,29 @@ async function handleUpdate(request, env) {
 
     await sheet.loadHeaderRow();
     const headers = sheet.headerValues;
+    
+    if (!headers || headers.length === 0) {
+      return jsonResponse({ 
+        error: "No headers found in sheet. Please ensure row 1 contains headers." 
+      }, 400);
+    }
+
     const rows = await sheet.getRows();
 
-    // Cari row berdasarkan index
-    const rowIndex = startRow - 2; // Karena header row adalah row 1, data mulai dari row 2
+    // Cari row berdasarkan index (row 2 = index 0 di array rows)
+    const rowIndex = startRow - 2;
     if (rowIndex < 0 || rowIndex >= rows.length) {
-      return jsonResponse({ error: `Row ${startRow} not found` }, 404);
+      return jsonResponse({ error: `Row ${startRow} not found (sheet has ${rows.length} data rows)` }, 404);
     }
 
     const targetRow = rows[rowIndex];
 
-    // Update row data
-    const rowData = {};
-    headers.forEach((h, i) => {
+    // Update row data dengan menggunakan method _rawData
+    headers.forEach((header, i) => {
       if (i < values.length) {
-        rowData[h] = values[i] || "";
+        const value = values[i] !== undefined && values[i] !== null ? String(values[i]) : "";
+        targetRow.set(header, value);
       }
-    });
-
-    Object.keys(rowData).forEach((field) => {
-      targetRow[field] = rowData[field];
     });
     
     await targetRow.save();
@@ -180,12 +232,16 @@ async function handleUpdate(request, env) {
     return jsonResponse({ success: true, message: "Row updated successfully" });
   } catch (error) {
     console.error("Error in handleUpdate:", error);
-    return jsonResponse({ error: "Failed to update data", details: error.message }, 500);
+    return jsonResponse({ 
+      error: "Failed to update data", 
+      details: error.message,
+      stack: error.stack 
+    }, 500);
   }
 }
 
 // =====================================================
-// 🔍 GET /api/sheets/find — find data by criteria (untuk kompatibilitas)
+// 🔍 POST /api/sheets/find — find data by criteria
 // =====================================================
 async function handleFind(request, env) {
   try {
@@ -202,15 +258,33 @@ async function handleFind(request, env) {
     if (!sheet) return jsonResponse({ error: `Sheet ${sheetName} not found` }, 404);
 
     await sheet.loadHeaderRow();
-    const rows = await sheet.getRows();
     const headers = sheet.headerValues;
+    
+    if (!headers || headers.length === 0) {
+      return jsonResponse({ 
+        error: "No headers found in sheet. Please ensure row 1 contains headers." 
+      }, 400);
+    }
 
-    const targetRow = rows.find((r) => (r[keyColumn] || "").trim() === keyValue.trim());
+    const rows = await sheet.getRows();
+    
+    console.log(`Searching in ${rows.length} rows for ${keyColumn}=${keyValue}`);
+
+    const targetRow = rows.find((r) => {
+      const cellValue = r.get(keyColumn);
+      return cellValue && String(cellValue).trim() === String(keyValue).trim();
+    });
 
     if (!targetRow)
-      return jsonResponse({ error: `Row with ${keyColumn}=${keyValue} not found` }, 404);
+      return jsonResponse({ 
+        error: `Row with ${keyColumn}=${keyValue} not found`,
+        searchedRows: rows.length 
+      }, 404);
 
-    const rowData = headers.map((h) => targetRow[h] || "");
+    const rowData = headers.map((h) => {
+      const value = targetRow.get(h);
+      return value !== null && value !== undefined ? String(value) : "";
+    });
 
     return jsonResponse({ 
       success: true, 
@@ -219,7 +293,11 @@ async function handleFind(request, env) {
     });
   } catch (error) {
     console.error("Error in handleFind:", error);
-    return jsonResponse({ error: "Failed to find data", details: error.message }, 500);
+    return jsonResponse({ 
+      error: "Failed to find data", 
+      details: error.message,
+      stack: error.stack 
+    }, 500);
   }
 }
 
