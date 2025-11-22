@@ -1267,8 +1267,10 @@
                 currentItems = [];
                 updateItemsTable();
                 
-                loadHistory();
-                updateRecentActivity();
+                // Memperbarui data di semua tab setelah submit
+                await loadHistory();
+                await updateRecentActivity();
+                updateDashboardStats();
                 
             } catch (error) {
                 console.error('Error submitting data:', error);
@@ -1278,16 +1280,154 @@
             }
         }
         
+        // Fungsi untuk memperbarui statistik dashboard
+        async function updateDashboardStats() {
+            const today = new Date();
+            const formattedToday = standardizeDateFormat(today.toISOString().split('T')[0]);
+            
+            try {
+                const data = await fetchSheetData(SO_RAWAN_SHEET);
+                
+                if (data && data.length > 0) {
+                    const headers = data[0];
+                    const tanggalCol = headers.indexOf('Tanggal Rekap');
+                    
+                    // Hitung jumlah input hari ini
+                    const todayData = data.slice(1).filter(row => {
+                        const rowDate = standardizeDateFormat(row[tanggalCol]);
+                        return rowDate === formattedToday;
+                    });
+                    
+                    // Hitung jumlah unik transaksi hari ini
+                    const uniqueTransactions = new Set();
+                    todayData.forEach(row => {
+                        const namaCol = headers.indexOf('Nama Kasir');
+                        const shiftCol = headers.indexOf('Shift');
+                        const pengirimCol = headers.indexOf('Pengirim');
+                        const key = `${row[namaCol]}-${row[tanggalCol]}-${row[shiftCol]}-${row[pengirimCol]}`;
+                        uniqueTransactions.add(key);
+                    });
+                    
+                    document.getElementById('todayData').textContent = uniqueTransactions.size;
+                }
+            } catch (error) {
+                console.error('Error updating dashboard stats:', error);
+            }
+        }
+        
         // Fungsi untuk memuat riwayat input hari ini
         async function loadHistory() {
             const today = new Date();
             const formattedToday = standardizeDateFormat(today.toISOString().split('T')[0]);
             
-            const data = await fetchSheetData(SO_RAWAN_SHEET);
-            const tbody = document.getElementById('historyTableBody');
-            tbody.innerHTML = '';
+            try {
+                const data = await fetchSheetData(SO_RAWAN_SHEET);
+                const tbody = document.getElementById('historyTableBody');
+                tbody.innerHTML = '';
+                
+                if (data && data.length > 0) {
+                    const headers = data[0];
+                    const timestampCol = headers.indexOf('Timestamp');
+                    const namaCol = headers.indexOf('Nama Kasir');
+                    const tanggalCol = headers.indexOf('Tanggal Rekap');
+                    const shiftCol = headers.indexOf('Shift');
+                    const pengirimCol = headers.indexOf('Pengirim');
+                    
+                    const todayData = data.slice(1).filter(row => {
+                        const rowDate = standardizeDateFormat(row[tanggalCol]);
+                        return rowDate === formattedToday;
+                    });
+                    
+                    const groupedData = {};
+                    todayData.forEach(row => {
+                        const key = `${row[namaCol]}-${row[tanggalCol]}-${row[shiftCol]}-${row[pengirimCol]}`;
+                        if (!groupedData[key]) {
+                            groupedData[key] = {
+                                kasir: row[namaCol],
+                                tanggal: row[tanggalCol],
+                                shift: row[shiftCol],
+                                pengirim: row[pengirimCol],
+                                waktu: row[timestampCol],
+                                count: 0
+                            };
+                        }
+                        groupedData[key].count++;
+                    });
+                    
+                    if (Object.keys(groupedData).length === 0) {
+                        tbody.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📭</div>
+                                <p>Belum ada riwayat input hari ini</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    // Urutkan berdasarkan waktu terbaru
+                    const sortedData = Object.values(groupedData).sort((a, b) => 
+                        new Date(b.waktu) - new Date(a.waktu)
+                    );
+                    
+                    sortedData.forEach(item => {
+                        const row = document.createElement('div');
+                        row.className = 'history-item';
+                        
+                        row.innerHTML = `
+                            <div class="history-header">
+                                <span class="history-title">Input oleh ${item.kasir}</span>
+                                <span class="history-time">${new Date(item.waktu).toLocaleTimeString('id-ID')}</span>
+                            </div>
+                            <div class="history-details">
+                                <span>📅 ${item.tanggal}</span>
+                                <span>🔄 Shift ${item.shift}</span>
+                                <span>👤 ${item.kasir}</span>
+                                <span>📦 ${item.count} item</span>
+                                <span class="badge ${item.pengirim === 'Website' ? 'badge-success' : 'badge-primary'}">
+                                    ${item.pengirim}
+                                </span>
+                            </div>
+                        `;
+                        
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    tbody.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <p>Belum ada riwayat input hari ini</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+                const tbody = document.getElementById('historyTableBody');
+                tbody.innerHTML = `
+                    <div class="alert alert-danger">
+                        <span>❌</span>
+                        <span>Gagal memuat riwayat: ${error.message}</span>
+                    </div>
+                `;
+            }
+        }
+        
+        // Fungsi untuk memperbarui aktivitas terbaru
+        async function updateRecentActivity() {
+            const recentActivity = document.getElementById('recentActivity');
             
-            if (data && data.length > 0) {
+            try {
+                const data = await fetchSheetData(SO_RAWAN_SHEET);
+                
+                if (!data || data.length < 2) {
+                    recentActivity.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <p>Belum ada aktivitas hari ini</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
                 const headers = data[0];
                 const timestampCol = headers.indexOf('Timestamp');
                 const namaCol = headers.indexOf('Nama Kasir');
@@ -1295,9 +1435,12 @@
                 const shiftCol = headers.indexOf('Shift');
                 const pengirimCol = headers.indexOf('Pengirim');
                 
+                const today = new Date();
+                const formattedToday = standardizeDateFormat(today.toISOString().split('T')[0]);
+                
                 const todayData = data.slice(1).filter(row => {
-                    const rowDate = row[tanggalCol];
-                    return standardizeDateFormat(rowDate) === formattedToday;
+                    const rowDate = standardizeDateFormat(row[tanggalCol]);
+                    return rowDate === formattedToday;
                 });
                 
                 const groupedData = {};
@@ -1317,72 +1460,51 @@
                 });
                 
                 if (Object.keys(groupedData).length === 0) {
-                    tbody.innerHTML = `
+                    recentActivity.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon">📭</div>
-                            <p>Belum ada riwayat input hari ini</p>
+                            <p>Belum ada aktivitas hari ini</p>
                         </div>
                     `;
                     return;
                 }
                 
-                Object.values(groupedData).forEach(item => {
-                    const row = document.createElement('div');
-                    row.className = 'history-item';
+                // Ambil 3 aktivitas terbaru
+                const sortedData = Object.values(groupedData)
+                    .sort((a, b) => new Date(b.waktu) - new Date(a.waktu))
+                    .slice(0, 3);
+                
+                recentActivity.innerHTML = '';
+                
+                sortedData.forEach(item => {
+                    const activityItem = document.createElement('div');
+                    activityItem.className = 'history-item';
                     
-                    row.innerHTML = `
+                    activityItem.innerHTML = `
                         <div class="history-header">
                             <span class="history-title">Input oleh ${item.kasir}</span>
-                            <span class="history-time">${new Date(item.waktu).toLocaleTimeString('id-ID')}</span>
+                            <span class="badge ${item.pengirim === 'Website' ? 'badge-success' : 'badge-primary'}">
+                                ${item.count} item
+                            </span>
                         </div>
                         <div class="history-details">
-                            <span>📅 ${item.tanggal}</span>
+                            <span>⏰ ${new Date(item.waktu).toLocaleTimeString('id-ID')}</span>
                             <span>🔄 Shift ${item.shift}</span>
-                            <span>👤 ${item.kasir}</span>
-                            <span>📦 ${item.count} item</span>
-                            <span class="badge ${item.pengirim === 'Website' ? 'badge-success' : 'badge-primary'}">
-                                ${item.pengirim}
-                            </span>
                         </div>
                     `;
                     
-                    tbody.appendChild(row);
+                    recentActivity.appendChild(activityItem);
                 });
                 
-                document.getElementById('todayData').textContent = Object.keys(groupedData).length;
-            } else {
-                tbody.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <p>Belum ada riwayat input hari ini</p>
-                    </div>
-                `;
-            }
-        }
-        
-        // Fungsi untuk memperbarui aktivitas terbaru
-        function updateRecentActivity() {
-            const recentActivity = document.getElementById('recentActivity');
-            const historyItems = document.querySelectorAll('#historyTableBody .history-item');
-            
-            if (historyItems.length === 0) {
+            } catch (error) {
+                console.error('Error updating recent activity:', error);
                 recentActivity.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <p>Belum ada aktivitas hari ini</p>
+                    <div class="alert alert-danger">
+                        <span>❌</span>
+                        <span>Gagal memuat aktivitas terbaru</span>
                     </div>
                 `;
-                return;
             }
-            
-            // Ambil 3 item terbaru
-            const recentItems = Array.from(historyItems).slice(-3).reverse();
-            recentActivity.innerHTML = '';
-            
-            recentItems.forEach(item => {
-                const clonedItem = item.cloneNode(true);
-                recentActivity.appendChild(clonedItem);
-            });
         }
 
         // Fungsi untuk sinkronisasi data
@@ -1392,7 +1514,8 @@
                 await loadListItems();
                 await loadKasirList();
                 await loadHistory();
-                updateRecentActivity();
+                await updateRecentActivity();
+                await updateDashboardStats();
                 alert('Data berhasil disinkronisasi!');
             } catch (error) {
                 console.error('Error syncing data:', error);
@@ -1463,6 +1586,9 @@
                 let rows = '';
                 filteredData.forEach(row => {
                     const selisih = parseInt(row[selisihCol]) || 0;
+                    const selisihClass = selisih > 0 ? 'selisih-positive' : selisih < 0 ? 'selisih-negative' : 'selisih-zero';
+                    const selisihText = selisih > 0 ? `+${selisih}` : selisih;
+                    
                     rows += `
                         <tr>
                             <td>${row[tanggalCol]}</td>
@@ -1472,9 +1598,7 @@
                             <td>${row[namaBarangCol]}</td>
                             <td>${row[ohCol]}</td>
                             <td>${row[fisikCol]}</td>
-                            <td class="${selisih > 0 ? 'selisih-positive' : selisih < 0 ? 'selisih-negative' : 'selisih-zero'}">
-                                ${selisih > 0 ? '+' : ''}${selisih}
-                            </td>
+                            <td class="${selisihClass}">${selisihText}</td>
                         </tr>
                     `;
                 });
@@ -1501,6 +1625,14 @@
             // Show selected tab
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
+            
+            // Jika pindah ke tab Dashboard atau Riwayat, refresh data
+            if (tabName === 'dashboard') {
+                updateRecentActivity();
+                updateDashboardStats();
+            } else if (tabName === 'history') {
+                loadHistory();
+            }
         }
         
         // Fungsi untuk memperbarui tanggal dan waktu
@@ -1535,6 +1667,7 @@
                 loadKasirList();
                 loadHistory();
                 updateRecentActivity();
+                updateDashboardStats();
             });
             document.getElementById('syncBtn').addEventListener('click', syncData);
         });
