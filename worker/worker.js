@@ -42,6 +42,8 @@ async function getGoogleSheet(env) {
 async function handleGet(request, env) {
   const url = new URL(request.url);
   const sheetName = url.searchParams.get("sheetName");
+  const range = url.searchParams.get("range") || '';
+  
   if (!sheetName) return jsonResponse({ error: "sheetName is required" }, 400);
 
   try {
@@ -59,8 +61,17 @@ async function handleGet(request, env) {
     await sheet.loadHeaderRow();
     const rows = await sheet.getRows();
     const headers = sheet.headerValues;
-    const values = rows.map((row) => headers.map((h) => row[h] || ""));
-    values.unshift(headers);
+    
+    // Jika range tidak ditentukan, kembalikan semua data
+    let values;
+    if (!range) {
+      values = rows.map((row) => headers.map((h) => row[h] || ""));
+      values.unshift(headers);
+    } else {
+      // Handle range jika diperlukan (untuk kompatibilitas)
+      values = rows.map((row) => headers.map((h) => row[h] || ""));
+      values.unshift(headers);
+    }
 
     return jsonResponse({ success: true, values });
   } catch (error) {
@@ -85,11 +96,22 @@ async function handleAppend(request, env) {
     await sheet.loadHeaderRow();
     const headers = sheet.headerValues;
 
-    const rowData = {};
-    headers.forEach((h, i) => (rowData[h] = values[i] || ""));
-    await sheet.addRow(rowData);
+    // Handle multiple rows
+    if (Array.isArray(values[0])) {
+      // Multiple rows
+      for (const rowValues of values) {
+        const rowData = {};
+        headers.forEach((h, i) => (rowData[h] = rowValues[i] || ""));
+        await sheet.addRow(rowData);
+      }
+    } else {
+      // Single row
+      const rowData = {};
+      headers.forEach((h, i) => (rowData[h] = values[i] || ""));
+      await sheet.addRow(rowData);
+    }
 
-    return jsonResponse({ success: true, message: "Row added successfully" });
+    return jsonResponse({ success: true, message: "Row(s) added successfully" });
   } catch (error) {
     console.error("Error in handleAppend:", error);
     return jsonResponse({ error: "Failed to append data", details: error.message }, 500);
@@ -97,15 +119,81 @@ async function handleAppend(request, env) {
 }
 
 // =====================================================
-// ✏️ PUT /api/sheets/update — update data existing
+// ✏️ PUT /api/sheets/update — update data existing by range
 // =====================================================
 async function handleUpdate(request, env) {
   try {
-    const { sheetName, keyColumn, keyValue, updates } = await request.json();
+    const { sheetName, range, values } = await request.json();
 
-    if (!sheetName || !keyColumn || !keyValue || !updates)
+    if (!sheetName || !range || !values)
       return jsonResponse(
-        { error: "sheetName, keyColumn, keyValue, and updates are required" },
+        { error: "sheetName, range, and values are required" },
+        400
+      );
+
+    const doc = await getGoogleSheet(env);
+    const sheet = doc.sheetsByTitle[sheetName];
+    if (!sheet) return jsonResponse({ error: `Sheet ${sheetName} not found` }, 404);
+
+    // Parse range (format: "A2:K2")
+    const rangeMatch = range.match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/);
+    if (!rangeMatch) {
+      return jsonResponse({ error: "Invalid range format. Use format like 'A2:K2'" }, 400);
+    }
+
+    const startCol = rangeMatch[1];
+    const startRow = parseInt(rangeMatch[2]);
+    const endCol = rangeMatch[3];
+    const endRow = parseInt(rangeMatch[4]);
+
+    // Validasi: hanya support single row update untuk sekarang
+    if (startRow !== endRow) {
+      return jsonResponse({ error: "Only single row updates are supported" }, 400);
+    }
+
+    await sheet.loadHeaderRow();
+    const headers = sheet.headerValues;
+    const rows = await sheet.getRows();
+
+    // Cari row berdasarkan index
+    const rowIndex = startRow - 2; // Karena header row adalah row 1, data mulai dari row 2
+    if (rowIndex < 0 || rowIndex >= rows.length) {
+      return jsonResponse({ error: `Row ${startRow} not found` }, 404);
+    }
+
+    const targetRow = rows[rowIndex];
+
+    // Update row data
+    const rowData = {};
+    headers.forEach((h, i) => {
+      if (i < values.length) {
+        rowData[h] = values[i] || "";
+      }
+    });
+
+    Object.keys(rowData).forEach((field) => {
+      targetRow[field] = rowData[field];
+    });
+    
+    await targetRow.save();
+
+    return jsonResponse({ success: true, message: "Row updated successfully" });
+  } catch (error) {
+    console.error("Error in handleUpdate:", error);
+    return jsonResponse({ error: "Failed to update data", details: error.message }, 500);
+  }
+}
+
+// =====================================================
+// 🔍 GET /api/sheets/find — find data by criteria (untuk kompatibilitas)
+// =====================================================
+async function handleFind(request, env) {
+  try {
+    const { sheetName, keyColumn, keyValue } = await request.json();
+
+    if (!sheetName || !keyColumn || !keyValue)
+      return jsonResponse(
+        { error: "sheetName, keyColumn, and keyValue are required" },
         400
       );
 
@@ -115,20 +203,23 @@ async function handleUpdate(request, env) {
 
     await sheet.loadHeaderRow();
     const rows = await sheet.getRows();
+    const headers = sheet.headerValues;
+
     const targetRow = rows.find((r) => (r[keyColumn] || "").trim() === keyValue.trim());
 
     if (!targetRow)
       return jsonResponse({ error: `Row with ${keyColumn}=${keyValue} not found` }, 404);
 
-    Object.keys(updates).forEach((field) => {
-      targetRow[field] = updates[field];
-    });
-    await targetRow.save();
+    const rowData = headers.map((h) => targetRow[h] || "");
 
-    return jsonResponse({ success: true, message: "Row updated successfully" });
+    return jsonResponse({ 
+      success: true, 
+      rowIndex: rows.indexOf(targetRow) + 2, // +2 karena header row 1, data mulai row 2
+      data: rowData 
+    });
   } catch (error) {
-    console.error("Error in handleUpdate:", error);
-    return jsonResponse({ error: "Failed to update data", details: error.message }, 500);
+    console.error("Error in handleFind:", error);
+    return jsonResponse({ error: "Failed to find data", details: error.message }, 500);
   }
 }
 
@@ -159,6 +250,7 @@ export default {
     if (path === "/api/sheets" && method === "GET") return handleGet(request, env);
     if (path === "/api/sheets/append" && method === "POST") return handleAppend(request, env);
     if (path === "/api/sheets/update" && method === "PUT") return handleUpdate(request, env);
+    if (path === "/api/sheets/find" && method === "POST") return handleFind(request, env);
 
     return jsonResponse(
       {
@@ -169,6 +261,7 @@ export default {
           "GET /api/sheets?sheetName=YourSheet",
           "POST /api/sheets/append",
           "PUT /api/sheets/update",
+          "POST /api/sheets/find",
         ],
       },
       404
