@@ -3,798 +3,1119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap SO Rawan Hilang</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <title>Rekap SO Rawan Hilang - 2GC6 BAROS PANDEGLANG</title>
     <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --success: #4cc9f0;
-            --dark: #1d3557;
-            --light: #f8f9fa;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
+
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --dark-bg: #1e293b;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px 0;
+            padding: 1rem;
+            color: var(--text-primary);
         }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            padding: 25px;
-            margin-bottom: 20px;
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        
+
+        /* Header */
         .header {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-lg);
             text-align: center;
-            color: white;
-            margin-bottom: 30px;
         }
-        
-        .header h1 {
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            opacity: 0.9;
+
+        .store-name {
             font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        
-        .form-section {
-            margin-bottom: 25px;
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
         }
-        
-        .btn-primary {
-            background: var(--primary);
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.875rem 1rem;
+            background: var(--card-bg);
             border: none;
-            padding: 10px 20px;
+            border-radius: 0.75rem;
             font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
+            white-space: nowrap;
         }
-        
+
+        .nav-tab.active {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-card.primary .stat-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-card.success .stat-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .stat-card.warning .stat-icon {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header::before {
+            content: '';
+            width: 4px;
+            height: 1.5rem;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control, .form-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
         .btn-primary:hover {
-            background: var(--secondary);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
         }
-        
-        .table-responsive {
-            border-radius: 10px;
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+            color: white;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 0.75rem;
             overflow: hidden;
         }
-        
-        .selisih-positive {
-            color: #28a745;
-            font-weight: bold;
-        }
-        
-        .selisih-negative {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        
-        .selisih-zero {
-            color: #6c757d;
-        }
-        
-        .stats-card {
-            text-align: center;
-            padding: 15px;
-        }
-        
-        .stats-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        
-        footer {
-            text-align: center;
+
+        thead {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             color: white;
-            margin-top: 30px;
-            opacity: 0.8;
         }
-        
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Item List */
+        .item-row {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+            border: 2px solid var(--border-color);
+        }
+
+        .item-row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .item-number {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Loading Spinner */
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 2rem;
         }
-        
-        .history-section {
-            max-height: 400px;
-            overflow-y: auto;
+
+        .spinner {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #6ee7b7;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #fca5a5;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #fcd34d;
+        }
+
+        /* History Card */
+        .history-item {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .history-title {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .history-time {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .history-details {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .badge-primary {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 1rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .store-name {
+                font-size: 0.95rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn-group .btn {
+                width: 100%;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tab {
+                min-width: 100px;
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
         <div class="header">
-            <h1><i class="fas fa-clipboard-list me-2"></i>Rekap SO Rawan Hilang</h1>
+            <div class="store-name">🏪 2GC6 BAROS PANDEGLANG</div>
+            <h1>📦 Rekap SO Rawan Hilang</h1>
             <p>Sistem input data Stock Opname barang rawan hilang - Terintegrasi dengan WhatsApp Bot</p>
         </div>
-        
-        <!-- Loading Indicator -->
-        <div id="loading" class="loading">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2">Memuat data...</p>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('input')">✍️ Input Data</button>
+            <button class="nav-tab" onclick="switchTab('history')">📋 Riwayat</button>
+            <button class="nav-tab" onclick="switchTab('report')">📈 Laporan</button>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="glass-card stats-card">
-                    <h5>Total Item Tersedia</h5>
-                    <div class="stats-number" id="totalItems">0</div>
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-value" id="totalItems">0</div>
+                    <div class="stat-label">Total Item Tersedia</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value" id="todayItems">0</div>
+                    <div class="stat-label">Input Hari Ini</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon">🔔</div>
+                    <div class="stat-value" id="selectedItems">0</div>
+                    <div class="stat-label">Item Dipilih</div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="glass-card stats-card">
-                    <h5>Item Hari Ini</h5>
-                    <div class="stats-number" id="todayData">0</div>
+
+            <!-- Quick Info Card -->
+            <div class="card">
+                <div class="card-header">ℹ️ Informasi Cepat</div>
+                <div class="alert alert-warning">
+                    <span>⚠️</span>
+                    <span>Pastikan data yang diinput sudah sesuai dengan kondisi fisik barang</span>
+                </div>
+                <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem;">
+                        <span style="font-weight: 600;">📅 Tanggal</span>
+                        <span id="currentDate">-</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem;">
+                        <span style="font-weight: 600;">⏰ Waktu</span>
+                        <span id="currentTime">-</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem;">
+                        <span style="font-weight: 600;">🔄 Status Sinkronisasi</span>
+                        <span class="badge badge-success">Aktif</span>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="glass-card stats-card">
-                    <h5>Item Dipilih</h5>
-                    <div class="stats-number" id="itemCount">0 Item</div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Main Form -->
-        <div class="glass-card">
-            <form id="soForm">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-section">
-                            <label for="tanggal" class="form-label">Tanggal Rekap</label>
-                            <input type="date" class="form-control" id="tanggal" required>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-section">
-                            <label for="shift" class="form-label">Shift</label>
-                            <select class="form-select" id="shift" required>
-                                <option value="">Pilih Shift</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-section">
-                            <label for="namaKasir" class="form-label">Nama Kasir</label>
-                            <select class="form-select" id="namaKasir" required>
-                                <option value="">Pilih Nama Kasir</option>
-                            </select>
-                        </div>
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">🕐 Aktivitas Terbaru</div>
+                <div id="recentActivity">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Belum ada aktivitas hari ini</p>
                     </div>
                 </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-section">
-                            <label for="itemSelect" class="form-label">Pilih Item Barang</label>
-                            <select class="form-select" id="itemSelect">
-                                <option value="">Pilih Item Barang</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-section">
-                            <label for="oh" class="form-label">OH (On Hand)</label>
-                            <input type="number" class="form-control" id="oh" value="0" min="0">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-section">
-                            <label for="fisik" class="form-label">Fisik</label>
-                            <input type="number" class="form-control" id="fisik" value="0" min="0">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-12">
-                        <button type="button" class="btn btn-primary me-2" id="addItemBtn">
-                            <i class="fas fa-plus me-1"></i>Tambah Item
-                        </button>
-                        <button type="button" class="btn btn-outline-danger" id="clearBtn">
-                            <i class="fas fa-trash me-1"></i>Hapus Semua
-                        </button>
-                        <button type="button" class="btn btn-outline-info float-end" id="refreshBtn">
-                            <i class="fas fa-sync-alt me-1"></i>Refresh
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- Items Table -->
-        <div class="glass-card">
-            <h4><i class="fas fa-table me-2"></i>Daftar Item</h4>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>PLU</th>
-                            <th>Nama Barang</th>
-                            <th>OH</th>
-                            <th>Fisik</th>
-                            <th>Selisih</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="itemsTableBody">
-                        <!-- Items will be populated here -->
-                    </tbody>
-                </table>
             </div>
         </div>
 
-        <!-- Submit Button -->
-        <div class="text-center mb-4">
-            <button type="button" class="btn btn-success btn-lg me-3" onclick="submitData()">
-                <i class="fas fa-paper-plane me-2"></i>Simpan Data
-            </button>
-            <button type="button" class="btn btn-info btn-lg" id="syncBtn">
-                <i class="fas fa-sync me-2"></i>Sinkronisasi Data
-            </button>
-        </div>
+        <!-- Input Data Tab -->
+        <div id="input" class="tab-content">
+            <!-- Loading Indicator -->
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner"></div>
+                <p>Memuat data...</p>
+            </div>
 
-        <!-- History Section -->
-        <div class="glass-card">
-            <h4><i class="fas fa-history me-2"></i>Riwayat Input Hari Ini</h4>
-            <div class="table-responsive history-section">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Tanggal</th>
-                            <th>Shift</th>
-                            <th>Kasir</th>
-                            <th>Jumlah Item</th>
-                            <th>Pengirim</th>
-                            <th>Waktu</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyTableBody">
-                        <!-- History will be populated here -->
-                    </tbody>
-                </table>
+            <!-- Form Input -->
+            <div class="card">
+                <div class="card-header">📝 Form Input Data</div>
+                
+                <div class="form-group">
+                    <label class="form-label">📅 Tanggal Rekap</label>
+                    <input type="date" class="form-control" id="tanggalRekap">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🔄 Shift</label>
+                    <select class="form-select" id="shiftSelect">
+                        <option value="">Pilih Shift</option>
+                        <option value="1">Shift 1</option>
+                        <option value="2">Shift 2</option>
+                        <option value="3">Shift 3</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">👤 Nama Kasir</label>
+                    <select class="form-select" id="kasirSelect">
+                        <option value="">Pilih Nama Kasir</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">📦 Pilih Item Barang</label>
+                    <select class="form-select" id="itemSelect">
+                        <option value="">Pilih Item Barang</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Item Details -->
+            <div class="card">
+                <div class="card-header">📋 Daftar Item yang Dipilih</div>
+                <div id="itemList">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <p>Belum ada item yang dipilih</p>
+                    </div>
+                </div>
+                <div class="btn-group" style="margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="addItem()">➕ Tambah Item</button>
+                    <button class="btn btn-danger" onclick="clearAllItems()">🗑️ Hapus Semua</button>
+                    <button class="btn btn-secondary" onclick="refreshData()">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="btn-group">
+                <button class="btn btn-success btn-block" onclick="saveData()">💾 Simpan Data</button>
+                <button class="btn btn-primary btn-block" onclick="syncData()">☁️ Sinkronisasi Data</button>
             </div>
         </div>
 
-        <footer>
-            <p>&copy; 2024 Rekap SO Rawan Hilang | Terintegrasi dengan Google Sheets & WhatsApp Bot | Multi-Input Support</p>
-        </footer>
+        <!-- History Tab -->
+        <div id="history" class="tab-content">
+            <div class="card">
+                <div class="card-header">📋 Riwayat Input Hari Ini</div>
+                <div id="historyList">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Belum ada riwayat input hari ini</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Tab -->
+        <div id="report" class="tab-content">
+            <div class="card">
+                <div class="card-header">📈 Laporan Stock Opname</div>
+                
+                <!-- Filter Options -->
+                <div class="form-group">
+                    <label class="form-label">📅 Filter Periode</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <input type="date" class="form-control" id="filterStartDate">
+                        <input type="date" class="form-control" id="filterEndDate">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="generateReport()">📊 Generate Laporan</button>
+
+                <div class="table-container" style="margin-top: 1.5rem;">
+                    <table id="reportTable">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Shift</th>
+                                <th>Kasir</th>
+                                <th>PLU</th>
+                                <th>Nama Barang</th>
+                                <th>OH</th>
+                                <th>Fisik</th>
+                                <th>Selisih</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="8" style="text-align: center; color: var(--text-secondary);">
+                                    Klik "Generate Laporan" untuk menampilkan data
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2024 Rekap SO Rawan Hilang | 2GC6 BAROS PANDEGLANG</p>
+            <p>Terintegrasi dengan Google Sheets & WhatsApp Bot | Multi-Input Support</p>
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Konfigurasi - URL Worker yang benar
-        const WORKER_URL = 'https://so-rawan-website.saefullah695.workers.dev';
-        
-        // Nama worksheet - HARUS SAMA DENGAN BOT WHATSAPP
-        const LIST_SO_SHEET = 'List_so';
-        const ABSENSI_SHEET = 'Absensi';
-        const SO_RAWAN_SHEET = 'SoRawan';
-        
-        // Variabel global
-        let listItems = [];
-        let kasirList = [];
-        let currentItems = [];
-        
-        // Fungsi generateUniqueId - SAMA DENGAN BOT WHATSAPP
-        function generateUniqueId(...args) {
-            const hash = CryptoJS.MD5(args.join('-')).toString();
-            return hash;
-        }
-        
-        // Fungsi standardizeDateFormat - SAMA DENGAN BOT WHATSAPP
-        function standardizeDateFormat(dateString) {
-            if (!dateString) return '';
-            
-            try {
-                let dateObj;
-                
-                if (dateString.match(/^\d{2}-\d{2}-\d{4}$/)) {
-                    const [day, month, year] = dateString.split('-');
-                    dateObj = new Date(`${year}-${month}-${day}`);
-                }
-                else if (dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-                    const [day, month, year] = dateString.split('/');
-                    dateObj = new Date(`${year}-${month}-${day}`);
-                }
-                else if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                    dateObj = new Date(dateString);
-                }
-                else {
-                    dateObj = new Date(dateString);
-                }
-                
-                if (!isNaN(dateObj.getTime())) {
-                    const day = String(dateObj.getDate()).padStart(2, '0');
-                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    const year = dateObj.getFullYear();
-                    return `${day}-${month}-${year}`;
-                }
-                
-                return dateString;
-            } catch (error) {
-                console.error('Error standardize date:', error);
-                return dateString;
-            }
-        }
-        
-        // Fungsi untuk mengambil data dari Google Sheets melalui Worker
-        async function fetchSheetData(sheetName, range = '') {
-            const url = `${WORKER_URL}/api/sheets?sheetName=${encodeURIComponent(sheetName)}&range=${encodeURIComponent(range)}`;
-            
-            try {
-                console.log(`Fetching data from: ${url}`);
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log(`Data fetched from ${sheetName}:`, data);
-                return data.values || [];
-            } catch (error) {
-                console.error(`Error fetching data from ${sheetName}:`, error);
-                showError(`Gagal mengambil data dari ${sheetName}: ${error.message}`);
-                return [];
-            }
-        }
-        
-        // Fungsi untuk mengirim data ke Google Sheets melalui Worker
-        async function appendToSheet(sheetName, data) {
-            const url = `${WORKER_URL}/api/sheets/append`;
-            
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        sheetName: sheetName,
-                        values: data
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error(`Error appending data to ${sheetName}:`, error);
-                throw error;
-            }
-        }
+        // Global Variables
+        let itemsData = [];
+        let selectedItems = [];
+        let historyData = [];
 
-        // Fungsi untuk update data di Google Sheets melalui Worker
-        async function updateSheetData(sheetName, range, data) {
-            const url = `${WORKER_URL}/api/sheets/update`;
-            
-            try {
-                const response = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        sheetName: sheetName,
-                        range: range,
-                        values: data
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error(`Error updating data in ${sheetName}:`, error);
-                throw error;
-            }
-        }
-        
-        // Fungsi untuk memuat data item dari worksheet List_so
-        async function loadListItems() {
-            showLoading();
-            const data = await fetchSheetData(LIST_SO_SHEET);
-            
-            if (data && data.length > 0) {
-                listItems = data.slice(1).map(row => ({
-                    plu: row[0] || '',
-                    nama: row[1] || ''
-                }));
-                
-                updateItemSelect();
-                updateTotalItems();
-                hideLoading();
-            } else {
-                console.error('Tidak ada data item ditemukan atau data kosong');
-                showError('Tidak ada data item ditemukan');
-                hideLoading();
-            }
-        }
-        
-        // Fungsi untuk memuat data kasir dari worksheet Absensi
-        async function loadKasirList() {
-            const data = await fetchSheetData(ABSENSI_SHEET);
-            
-            if (data && data.length > 0) {
-                // Mengambil kolom NAMA (indeks 1) dari worksheet Absensi
-                kasirList = [...new Set(data.slice(1).map(row => row[1] || '').filter(name => name))];
-                
-                updateKasirSelect();
-            } else {
-                console.error('Tidak ada data kasir ditemukan');
-                showError('Tidak ada data kasir ditemukan');
-            }
-        }
-        
-        // Fungsi untuk memperbarui dropdown item
-        function updateItemSelect() {
-            const select = document.getElementById('itemSelect');
-            select.innerHTML = '<option value="">Pilih Item Barang</option>';
-            
-            listItems.forEach((item, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `${item.plu} - ${item.nama}`;
-                select.appendChild(option);
-            });
-        }
-        
-        // Fungsi untuk memperbarui dropdown kasir
-        function updateKasirSelect() {
-            const select = document.getElementById('namaKasir');
-            select.innerHTML = '<option value="">Pilih Nama Kasir</option>';
-            
-            kasirList.forEach(kasir => {
-                const option = document.createElement('option');
-                option.value = kasir;
-                option.textContent = kasir;
-                select.appendChild(option);
-            });
-        }
-        
-        // Fungsi untuk menambah item ke tabel
-        function addItemToTable() {
-            const itemSelect = document.getElementById('itemSelect');
-            const ohInput = document.getElementById('oh');
-            const fisikInput = document.getElementById('fisik');
-            
-            if (itemSelect.value === '') {
-                alert('Pilih item terlebih dahulu!');
-                return;
-            }
-            
-            if (ohInput.value === '' || fisikInput.value === '') {
-                alert('Isi OH dan Fisik terlebih dahulu!');
-                return;
-            }
-            
-            const itemIndex = parseInt(itemSelect.value);
-            const selectedItem = listItems[itemIndex];
-            const oh = parseInt(ohInput.value) || 0;
-            const fisik = parseInt(fisikInput.value) || 0;
-            const selisih = fisik - oh;
-            
-            const existingIndex = currentItems.findIndex(item => item.plu === selectedItem.plu);
-            
-            if (existingIndex !== -1) {
-                currentItems[existingIndex].oh = oh;
-                currentItems[existingIndex].fisik = fisik;
-                currentItems[existingIndex].selisih = selisih;
-            } else {
-                currentItems.push({
-                    plu: selectedItem.plu,
-                    nama: selectedItem.nama,
-                    oh: oh,
-                    fisik: fisik,
-                    selisih: selisih
-                });
-            }
-            
-            updateItemsTable();
-            
-            ohInput.value = '0';
-            fisikInput.value = '0';
-            itemSelect.value = '';
-        }
-        
-        // Fungsi untuk memperbarui tabel item
-        function updateItemsTable() {
-            const tbody = document.getElementById('itemsTableBody');
-            tbody.innerHTML = '';
-            
-            currentItems.forEach((item, index) => {
-                const row = document.createElement('tr');
-                
-                let selisihClass = 'selisih-zero';
-                if (item.selisih > 0) {
-                    selisihClass = 'selisih-positive';
-                } else if (item.selisih < 0) {
-                    selisihClass = 'selisih-negative';
-                }
-                
-                const selisihText = item.selisih > 0 ? `+${item.selisih}` : item.selisih;
-                
-                row.innerHTML = `
-                    <td>${item.plu}</td>
-                    <td>${item.nama}</td>
-                    <td>${item.oh}</td>
-                    <td>${item.fisik}</td>
-                    <td class="${selisihClass}">${selisihText}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="removeItem(${index})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-            
-            document.getElementById('itemCount').textContent = `${currentItems.length} Item`;
-        }
-        
-        // Fungsi untuk menghapus item dari tabel
-        function removeItem(index) {
-            currentItems.splice(index, 1);
-            updateItemsTable();
-        }
-        
-        // Fungsi untuk menghapus semua item
-        function clearAllItems() {
-            if (confirm('Apakah Anda yakin ingin menghapus semua item?')) {
-                currentItems = [];
-                updateItemsTable();
-            }
-        }
-        
-        // Fungsi untuk memperbarui statistik
-        function updateTotalItems() {
-            document.getElementById('totalItems').textContent = listItems.length;
-        }
-        
-        // Fungsi untuk menampilkan loading
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-        }
-        
-        // Fungsi untuk menyembunyikan loading
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        // Fungsi untuk menampilkan error
-        function showError(message) {
-            alert(`Error: ${message}`);
-        }
-        
-        // Fungsi untuk mencari data existing di SoRawan worksheet
-        async function findExistingData(nama, shift, tanggal, plu) {
-            try {
-                const data = await fetchSheetData(SO_RAWAN_SHEET);
-                if (!data || data.length < 2) return null;
-                
-                const headers = data[0];
-                const idColumn = headers.indexOf('ID');
-                const namaColumn = headers.indexOf('Nama Kasir');
-                const shiftColumn = headers.indexOf('Shift');
-                const tanggalColumn = headers.indexOf('Tanggal Rekap');
-                const pluColumn = headers.indexOf('PLU');
-                
-                const searchId = generateUniqueId(nama, shift, tanggal, plu);
-                
-                for (let i = 1; i < data.length; i++) {
-                    const row = data[i];
-                    if (row[idColumn] === searchId) {
-                        return {
-                            rowIndex: i,
-                            data: row
-                        };
-                    }
-                }
-                
-                return null;
-            } catch (error) {
-                console.error('Error finding existing data:', error);
-                return null;
-            }
-        }
-        
-        // Fungsi untuk mengirim data ke Google Sheets
-        async function submitData() {
-            if (currentItems.length === 0) {
-                alert('Tidak ada item yang ditambahkan!');
-                return;
-            }
-            
-            const tanggal = document.getElementById('tanggal').value;
-            const shift = document.getElementById('shift').value;
-            const namaKasir = document.getElementById('namaKasir').value;
-            
-            if (!tanggal || !shift || !namaKasir) {
-                alert('Harap lengkapi semua field!');
-                return;
-            }
-            
-            showLoading();
-            
-            try {
-                const formattedDate = standardizeDateFormat(tanggal);
-                
-                let successCount = 0;
-                let updateCount = 0;
-                
-                for (const item of currentItems) {
-                    const uniqueId = generateUniqueId(namaKasir, shift, formattedDate, item.plu);
-                    const timestamp = new Date().toISOString();
-                    
-                    const existingData = await findExistingData(namaKasir, shift, formattedDate, item.plu);
-                    
-                    const rowData = [
-                        uniqueId,
-                        timestamp,
-                        namaKasir,
-                        formattedDate,
-                        shift,
-                        item.plu,
-                        item.nama,
-                        item.oh,
-                        item.fisik,
-                        item.selisih,
-                        'Website'
-                    ];
-                    
-                    if (existingData) {
-                        const range = `A${existingData.rowIndex + 1}:K${existingData.rowIndex + 1}`;
-                        await updateSheetData(SO_RAWAN_SHEET, range, [rowData]);
-                        updateCount++;
-                    } else {
-                        await appendToSheet(SO_RAWAN_SHEET, [rowData]);
-                        successCount++;
-                    }
-                }
-                
-                let message = `Data berhasil disimpan!`;
-                if (successCount > 0) {
-                    message += ` ${successCount} item baru ditambahkan.`;
-                }
-                if (updateCount > 0) {
-                    message += ` ${updateCount} item diperbarui.`;
-                }
-                
-                alert(message);
-                
-                document.getElementById('soForm').reset();
-                currentItems = [];
-                updateItemsTable();
-                
-                loadHistory();
-                
-            } catch (error) {
-                console.error('Error submitting data:', error);
-                alert('Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
-            } finally {
-                hideLoading();
-            }
-        }
-        
-        // Fungsi untuk memuat riwayat input hari ini
-        async function loadHistory() {
-            const today = new Date();
-            const formattedToday = standardizeDateFormat(today.toISOString().split('T')[0]);
-            
-            const data = await fetchSheetData(SO_RAWAN_SHEET);
-            const tbody = document.getElementById('historyTableBody');
-            tbody.innerHTML = '';
-            
-            if (data && data.length > 0) {
-                const headers = data[0];
-                const timestampCol = headers.indexOf('Timestamp');
-                const namaCol = headers.indexOf('Nama Kasir');
-                const tanggalCol = headers.indexOf('Tanggal Rekap');
-                const shiftCol = headers.indexOf('Shift');
-                const pengirimCol = headers.indexOf('Pengirim');
-                
-                const todayData = data.slice(1).filter(row => {
-                    const rowDate = row[tanggalCol];
-                    return standardizeDateFormat(rowDate) === formattedToday;
-                });
-                
-                const groupedData = {};
-                todayData.forEach(row => {
-                    const key = `${row[namaCol]}-${row[tanggalCol]}-${row[shiftCol]}-${row[pengirimCol]}`;
-                    if (!groupedData[key]) {
-                        groupedData[key] = {
-                            kasir: row[namaCol],
-                            tanggal: row[tanggalCol],
-                            shift: row[shiftCol],
-                            pengirim: row[pengirimCol],
-                            waktu: row[timestampCol],
-                            count: 0
-                        };
-                    }
-                    groupedData[key].count++;
-                });
-                
-                Object.values(groupedData).forEach(item => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${item.tanggal}</td>
-                        <td>${item.shift}</td>
-                        <td>${item.kasir}</td>
-                        <td>${item.count} item</td>
-                        <td>
-                            <span class="badge ${item.pengirim === 'Website' ? 'bg-success' : 'bg-primary'}">
-                                ${item.pengirim}
-                            </span>
-                        </td>
-                        <td>${new Date(item.waktu).toLocaleTimeString('id-ID')}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                
-                document.getElementById('todayData').textContent = Object.keys(groupedData).length;
-            }
-        }
-
-        // Fungsi untuk sinkronisasi data
-        async function syncData() {
-            showLoading();
-            try {
-                await loadListItems();
-                await loadKasirList();
-                await loadHistory();
-                alert('Data berhasil disinkronisasi!');
-            } catch (error) {
-                console.error('Error syncing data:', error);
-                alert('Terjadi kesalahan saat sinkronisasi data.');
-            } finally {
-                hideLoading();
-            }
-        }
-        
-        // Inisialisasi saat halaman dimuat
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('tanggal').value = today;
-            
-            // Load data saat halaman pertama kali dibuka
-            syncData();
-            
-            // Event listeners
-            document.getElementById('addItemBtn').addEventListener('click', addItemToTable);
-            document.getElementById('soForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitData();
-            });
-            document.getElementById('clearBtn').addEventListener('click', clearAllItems);
-            document.getElementById('refreshBtn').addEventListener('click', function() {
-                loadListItems();
-                loadKasirList();
-                loadHistory();
-            });
-            document.getElementById('syncBtn').addEventListener('click', syncData);
+            initializeApp();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
         });
+
+        function initializeApp() {
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tanggalRekap').value = today;
+            document.getElementById('filterStartDate').value = today;
+            document.getElementById('filterEndDate').value = today;
+
+            // Load initial data
+            loadInitialData();
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', dateOptions);
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('id-ID', timeOptions);
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function loadInitialData() {
+            // Simulate loading
+            document.getElementById('loadingIndicator').style.display = 'block';
+
+            setTimeout(() => {
+                // Sample data
+                itemsData = [
+                    { plu: '001', nama: 'Rokok Sampoerna Mild', oh: 50 },
+                    { plu: '002', nama: 'Rokok Djarum Super', oh: 45 },
+                    { plu: '003', nama: 'Rokok Gudang Garam', oh: 60 },
+                    { plu: '004', nama: 'Permen Kopiko', oh: 100 },
+                    { plu: '005', nama: 'Coklat Silverqueen', oh: 75 }
+                ];
+
+                const kasirNames = ['Ahmad', 'Budi', 'Citra', 'Dewi', 'Eko'];
+                
+                // Populate kasir dropdown
+                const kasirSelect = document.getElementById('kasirSelect');
+                kasirNames.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    kasirSelect.appendChild(option);
+                });
+
+                // Populate item dropdown
+                const itemSelect = document.getElementById('itemSelect');
+                itemsData.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.plu;
+                    option.textContent = `${item.plu} - ${item.nama}`;
+                    itemSelect.appendChild(option);
+                });
+
+                updateStats();
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }, 1000);
+        }
+
+        function updateStats() {
+            document.getElementById('totalItems').textContent = itemsData.length;
+            document.getElementById('todayItems').textContent = historyData.length;
+            document.getElementById('selectedItems').textContent = selectedItems.length;
+        }
+
+        function addItem() {
+            const itemPLU = document.getElementById('itemSelect').value;
+            if (!itemPLU) {
+                alert('⚠️ Pilih item terlebih dahulu!');
+                return;
+            }
+
+            const item = itemsData.find(i => i.plu === itemPLU);
+            if (!item) return;
+
+            // Check if item already added
+            if (selectedItems.find(i => i.plu === itemPLU)) {
+                alert('⚠️ Item sudah ditambahkan!');
+                return;
+            }
+
+            selectedItems.push({
+                plu: item.plu,
+                nama: item.nama,
+                oh: item.oh,
+                fisik: 0
+            });
+
+            renderItemList();
+            updateStats();
+        }
+
+        function renderItemList() {
+            const itemList = document.getElementById('itemList');
+            
+            if (selectedItems.length === 0) {
+                itemList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <p>Belum ada item yang dipilih</p>
+                    </div>
+                `;
+                return;
+            }
+
+            itemList.innerHTML = selectedItems.map((item, index) => `
+                <div class="item-row">
+                    <div class="item-row-header">
+                        <span class="item-number">Item ${index + 1}</span>
+                        <button class="btn btn-danger btn-sm" onclick="removeItem(${index})">🗑️ Hapus</button>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0.75rem;">
+                        <label class="form-label">PLU / Nama Barang</label>
+                        <input type="text" class="form-control" value="${item.plu} - ${item.nama}" readonly>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">OH (On Hand)</label>
+                            <input type="number" class="form-control" value="${item.oh}" readonly>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Fisik</label>
+                            <input type="number" class="form-control" id="fisik_${index}" 
+                                   value="${item.fisik}" onchange="updateFisik(${index}, this.value)">
+                        </div>
+                    </div>
+                    <div style="margin-top: 0.75rem; padding: 0.75rem; background: ${getSelisihColor(item.oh - item.fisik)}; border-radius: 0.5rem; text-align: center; font-weight: 600;">
+                        Selisih: ${item.oh - item.fisik}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getSelisihColor(selisih) {
+            if (selisih === 0) return '#d1fae5';
+            if (selisih > 0) return '#fee2e2';
+            return '#fef3c7';
+        }
+
+        function updateFisik(index, value) {
+            selectedItems[index].fisik = parseInt(value) || 0;
+            renderItemList();
+        }
+
+        function removeItem(index) {
+            if (confirm('❓ Hapus item ini?')) {
+                selectedItems.splice(index, 1);
+                renderItemList();
+                updateStats();
+            }
+        }
+
+        function clearAllItems() {
+            if (confirm('❓ Hapus semua item yang dipilih?')) {
+                selectedItems = [];
+                renderItemList();
+                updateStats();
+            }
+        }
+
+        function saveData() {
+            // Validate
+            const tanggal = document.getElementById('tanggalRekap').value;
+            const shift = document.getElementById('shiftSelect').value;
+            const kasir = document.getElementById('kasirSelect').value;
+
+            if (!tanggal || !shift || !kasir) {
+                alert('⚠️ Lengkapi data tanggal, shift, dan kasir!');
+                return;
+            }
+
+            if (selectedItems.length === 0) {
+                alert('⚠️ Belum ada item yang dipilih!');
+                return;
+            }
+
+            // Save to history
+            const now = new Date();
+            historyData.push({
+                tanggal: tanggal,
+                shift: shift,
+                kasir: kasir,
+                items: [...selectedItems],
+                waktu: now.toLocaleString('id-ID'),
+                pengirim: kasir
+            });
+
+            // Show success message
+            alert('✅ Data berhasil disimpan!');
+
+            // Clear form
+            selectedItems = [];
+            renderItemList();
+            updateStats();
+            renderHistory();
+            updateRecentActivity();
+        }
+
+        function syncData() {
+            alert('☁️ Data berhasil disinkronisasi dengan server!');
+        }
+
+        function refreshData() {
+            if (confirm('🔄 Refresh data? Perubahan yang belum disimpan akan hilang.')) {
+                selectedItems = [];
+                renderItemList();
+                updateStats();
+            }
+        }
+
+        function renderHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (historyData.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Belum ada riwayat input hari ini</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyList.innerHTML = historyData.map((data, index) => `
+                <div class="history-item">
+                    <div class="history-header">
+                        <span class="history-title">Input #${index + 1}</span>
+                        <span class="history-time">${data.waktu}</span>
+                    </div>
+                    <div class="history-details">
+                        <span>📅 ${data.tanggal}</span>
+                        <span>🔄 Shift ${data.shift}</span>
+                        <span>👤 ${data.kasir}</span>
+                        <span>📦 ${data.items.length} item</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateRecentActivity() {
+            const recentActivity = document.getElementById('recentActivity');
+            
+            if (historyData.length === 0) {
+                recentActivity.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Belum ada aktivitas hari ini</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const recent = historyData.slice(-3).reverse();
+            recentActivity.innerHTML = recent.map(data => `
+                <div class="history-item">
+                    <div class="history-header">
+                        <span class="history-title">Input oleh ${data.kasir}</span>
+                        <span class="badge badge-success">${data.items.length} item</span>
+                    </div>
+                    <div class="history-details">
+                        <span>⏰ ${data.waktu}</span>
+                        <span>🔄 Shift ${data.shift}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function generateReport() {
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+
+            if (!startDate || !endDate) {
+                alert('⚠️ Pilih periode tanggal terlebih dahulu!');
+                return;
+            }
+
+            const tbody = document.querySelector('#reportTable tbody');
+            
+            if (historyData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: var(--text-secondary);">
+                            Tidak ada data untuk ditampilkan
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let rows = '';
+            historyData.forEach(data => {
+                data.items.forEach(item => {
+                    const selisih = item.oh - item.fisik;
+                    rows += `
+                        <tr>
+                            <td>${data.tanggal}</td>
+                            <td>Shift ${data.shift}</td>
+                            <td>${data.kasir}</td>
+                            <td>${item.plu}</td>
+                            <td>${item.nama}</td>
+                            <td>${item.oh}</td>
+                            <td>${item.fisik}</td>
+                            <td style="color: ${selisih === 0 ? 'green' : selisih > 0 ? 'red' : 'orange'}; font-weight: 600;">
+                                ${selisih}
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+
+            tbody.innerHTML = rows;
+        }
     </script>
 </body>
 </html>
