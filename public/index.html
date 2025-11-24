@@ -27,19 +27,14 @@
             --border-color: #e2e8f0;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-card: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --blur-bg: blur(10px);
         }
 
         body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--gradient-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 0.5rem;
+            padding: 1rem;
             color: var(--text-primary);
-            line-height: 1.5;
         }
 
         .container {
@@ -47,49 +42,37 @@
             margin: 0 auto;
         }
 
-        /* Header dengan Glassmorphism */
+        /* Header */
         .header {
-            background: var(--glass-bg);
-            backdrop-filter: var(--blur-bg);
-            -webkit-backdrop-filter: var(--blur-bg);
-            border-radius: 1.5rem;
-            padding: 1.25rem;
-            margin-bottom: 1.25rem;
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             box-shadow: var(--shadow-lg);
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .store-name {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--primary-color);
             margin-bottom: 0.5rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 50px;
-            background-color: rgba(255, 255, 255, 0.8);
+            letter-spacing: 1px;
         }
 
         .header h1 {
-            font-size: 1.35rem;
+            font-size: 1.5rem;
             color: var(--text-primary);
             margin-bottom: 0.5rem;
-            font-weight: 700;
         }
 
         .header p {
             color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
-        /* Navigation Tabs dengan desain modern */
+        /* Navigation Tabs */
         .nav-tabs {
             display: flex;
             gap: 0.5rem;
@@ -97,7 +80,6 @@
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
-            padding-bottom: 0.25rem;
         }
 
         .nav-tabs::-webkit-scrollbar {
@@ -105,23 +87,18 @@
         }
 
         .nav-tab {
-            flex: 0 0 auto;
+            flex: 1;
+            min-width: 120px;
             padding: 0.875rem 1rem;
-            background: var(--glass-bg);
-            backdrop-filter: var(--blur-bg);
-            -webkit-backdrop-filter: var(--blur-bg);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: var(--card-bg);
+            border: none;
             border-radius: 0.75rem;
             font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             box-shadow: var(--shadow);
             white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
         }
 
         .nav-tab.active {
@@ -131,23 +108,20 @@
             box-shadow: var(--shadow-lg);
         }
 
-        /* Dashboard Stats dengan grid responsif */
+        /* Dashboard Stats */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
             margin-bottom: 1.5rem;
         }
 
         .stat-card {
-            background: var(--gradient-card);
+            background: var(--card-bg);
             border-radius: 1rem;
             padding: 1.25rem;
             box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            display: flex;
-            flex-direction: column;
+            transition: transform 0.3s;
         }
 
         .stat-card:hover {
@@ -156,19 +130,18 @@
         }
 
         .stat-icon {
-            width: 2.5rem;
-            height: 2.5rem;
+            width: 3rem;
+            height: 3rem;
             border-radius: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             margin-bottom: 0.75rem;
-            align-self: flex-start;
         }
 
         .stat-card.primary .stat-icon {
-            background: var(--gradient-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
@@ -183,14 +156,14 @@
         }
 
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--text-primary);
             margin-bottom: 0.25rem;
         }
 
         .stat-label {
-            font-size: 0.8rem;
+            font-size: 0.875rem;
             color: var(--text-secondary);
         }
 
@@ -203,28 +176,31 @@
             display: block;
         }
 
-        /* Cards dengan Glassmorphism */
+        /* Cards */
         .card {
-            background: var(--glass-bg);
-            backdrop-filter: var(--blur-bg);
-            -webkit-backdrop-filter: var(--blur-bg);
-            border-radius: 1.25rem;
-            padding: 1.25rem;
-            margin-bottom: 1.25rem;
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             box-shadow: var(--shadow-lg);
-            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .card-header {
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             font-weight: 700;
             color: var(--text-primary);
             margin-bottom: 1.25rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .card-header::before {
+            content: '';
+            width: 4px;
+            height: 1.5rem;
+            background: var(--primary-color);
+            border-radius: 2px;
         }
 
         /* Form Elements */
@@ -256,7 +232,7 @@
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        /* Buttons dengan desain modern */
+        /* Buttons */
         .btn {
             padding: 0.875rem 1.5rem;
             border: none;
@@ -277,7 +253,7 @@
         }
 
         .btn-primary {
-            background: var(--gradient-primary);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             color: white;
         }
 
@@ -316,7 +292,7 @@
             flex-wrap: wrap;
         }
 
-        /* Table dengan scroll horizontal */
+        /* Table */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -330,11 +306,10 @@
             background: white;
             border-radius: 0.75rem;
             overflow: hidden;
-            min-width: 600px;
         }
 
         thead {
-            background: var(--gradient-primary);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             color: white;
         }
 
@@ -360,7 +335,7 @@
             border-bottom: none;
         }
 
-        /* Item List dengan desain card */
+        /* Item List */
         .item-row {
             background: #f8fafc;
             padding: 1rem;
@@ -392,7 +367,7 @@
             font-size: 0.875rem;
         }
 
-        /* Loading Spinner dengan animasi */
+        /* Loading Spinner */
         .loading {
             display: none;
             text-align: center;
@@ -414,7 +389,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Alert dengan ikon */
+        /* Alert */
         .alert {
             padding: 1rem 1.25rem;
             border-radius: 0.75rem;
@@ -443,7 +418,7 @@
             border: 2px solid #fcd34d;
         }
 
-        /* History Card dengan desain modern */
+        /* History Card */
         .history-item {
             background: #f8fafc;
             padding: 1rem;
@@ -479,7 +454,7 @@
             color: var(--text-secondary);
         }
 
-        /* Badge dengan gradient */
+        /* Badge */
         .badge {
             display: inline-block;
             padding: 0.25rem 0.75rem;
@@ -503,25 +478,22 @@
             color: #991b1b;
         }
 
-        /* Footer dengan desain minimalis */
+        /* Footer */
         .footer {
             text-align: center;
             padding: 1.5rem;
-            background: var(--glass-bg);
-            backdrop-filter: var(--blur-bg);
-            -webkit-backdrop-filter: var(--blur-bg);
+            background: var(--card-bg);
             border-radius: 1rem;
             margin-top: 2rem;
             box-shadow: var(--shadow);
             color: var(--text-secondary);
             font-size: 0.875rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        /* Empty State dengan ilustrasi */
+        /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 2rem 1rem;
+            padding: 3rem 1rem;
             color: var(--text-secondary);
         }
 
@@ -529,6 +501,84 @@
             font-size: 3rem;
             margin-bottom: 1rem;
             opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .store-name {
+                font-size: 0.95rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn-group .btn {
+                width: 100%;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tab {
+                min-width: 100px;
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
 
         /* Selisih styles */
@@ -560,8 +610,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0.5rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
         }
         
         .loss-title {
@@ -571,7 +619,7 @@
         
         .loss-details {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 0.75rem;
             margin-bottom: 0.75rem;
             font-size: 0.875rem;
@@ -587,13 +635,15 @@
         }
         
         .loss-summary {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.75rem;
+            display: flex;
+            gap: 1rem;
             margin-bottom: 1rem;
+            flex-wrap: wrap;
         }
         
         .summary-card {
+            flex: 1;
+            min-width: 150px;
             background: white;
             padding: 1rem;
             border-radius: 0.75rem;
@@ -602,13 +652,13 @@
         }
         
         .summary-value {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             margin-bottom: 0.25rem;
         }
         
         .summary-label {
-            font-size: 0.8rem;
+            font-size: 0.875rem;
             color: var(--text-secondary);
         }
         
@@ -623,256 +673,6 @@
         .summary-avg {
             color: #10b981;
         }
-
-        /* Floating Action Button */
-        .fab-container {
-            position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            z-index: 100;
-        }
-
-        .fab {
-            width: 3.5rem;
-            height: 3.5rem;
-            border-radius: 50%;
-            background: var(--gradient-primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-lg);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1.25rem;
-        }
-
-        .fab:hover {
-            transform: scale(1.1);
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            padding-bottom: 0.25rem;
-        }
-
-        .quick-actions::-webkit-scrollbar {
-            display: none;
-        }
-
-        .quick-action {
-            flex: 0 0 auto;
-            padding: 0.75rem 1rem;
-            background: var(--glass-bg);
-            backdrop-filter: var(--blur-bg);
-            -webkit-backdrop-filter: var(--blur-bg);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 0.75rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow);
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
-        }
-
-        .quick-action:hover {
-            background: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* Responsive Design untuk Mobile */
-        @media (max-width: 768px) {
-            body {
-                padding: 0.5rem;
-            }
-
-            .header {
-                padding: 1rem;
-            }
-
-            .header h1 {
-                font-size: 1.25rem;
-            }
-
-            .store-name {
-                font-size: 0.9rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.75rem;
-            }
-
-            .stat-value {
-                font-size: 1.35rem;
-            }
-
-            .card {
-                padding: 1rem;
-                border-radius: 1rem;
-            }
-
-            .btn-group {
-                flex-direction: column;
-            }
-
-            .btn-group .btn {
-                width: 100%;
-            }
-
-            .nav-tab {
-                padding: 0.75rem 1rem;
-                font-size: 0.8rem;
-            }
-
-            .quick-action {
-                padding: 0.75rem 1rem;
-                font-size: 0.8rem;
-            }
-
-            .loss-summary {
-                grid-template-columns: 1fr;
-            }
-
-            .loss-details {
-                grid-template-columns: 1fr;
-            }
-
-            .history-details {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .fab-container {
-                bottom: 1rem;
-                right: 1rem;
-            }
-
-            .fab {
-                width: 3rem;
-                height: 3rem;
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .nav-tab {
-                min-width: 100px;
-                font-size: 0.75rem;
-                padding: 0.75rem 0.875rem;
-            }
-
-            .header p {
-                font-size: 0.8rem;
-            }
-
-            .card-header {
-                font-size: 1rem;
-            }
-
-            .form-control, .form-select {
-                padding: 0.75rem 0.875rem;
-            }
-
-            .btn {
-                padding: 0.75rem 1.25rem;
-                font-size: 0.9rem;
-            }
-
-            .quick-action {
-                min-width: 100px;
-                font-size: 0.75rem;
-                padding: 0.75rem 0.875rem;
-            }
-        }
-
-        /* Dark Mode Support */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --card-bg: rgba(30, 41, 59, 0.7);
-                --text-primary: #f1f5f9;
-                --text-secondary: #94a3b8;
-                --border-color: #334155;
-            }
-
-            .card {
-                background: rgba(30, 41, 59, 0.7);
-                color: #f1f5f9;
-            }
-
-            .form-control, .form-select {
-                background: #1e293b;
-                color: #f1f5f9;
-                border-color: #334155;
-            }
-
-            table {
-                background: #1e293b;
-                color: #f1f5f9;
-            }
-
-            tbody tr:hover {
-                background: #334155;
-            }
-
-            .item-row {
-                background: #334155;
-            }
-
-            .history-item {
-                background: #334155;
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
-        }
-
-        /* Animasi tambahan untuk interaksi */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .tab-content.active {
-            animation: fadeIn 0.3s ease;
-        }
-
-        .stat-card {
-            animation: fadeIn 0.5s ease;
-        }
     </style>
 </head>
 <body>
@@ -884,39 +684,13 @@
             <p>Sistem input data Stock Opname barang rawan hilang - Terintegrasi dengan WhatsApp Bot</p>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <div class="quick-action" onclick="switchTab('dashboard')">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </div>
-            <div class="quick-action" onclick="switchTab('input')">
-                <i class="fas fa-edit"></i> Input Data
-            </div>
-            <div class="quick-action" onclick="switchTab('history')">
-                <i class="fas fa-history"></i> Riwayat
-            </div>
-            <div class="quick-action" onclick="switchTab('report')">
-                <i class="fas fa-chart-bar"></i> Laporan
-            </div>
-        </div>
-
         <!-- Navigation Tabs -->
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="switchTab('dashboard')">
-                <i class="fas fa-chart-pie"></i> Dashboard
-            </button>
-            <button class="nav-tab" onclick="switchTab('input')">
-                <i class="fas fa-edit"></i> Input Data
-            </button>
-            <button class="nav-tab" onclick="switchTab('history')">
-                <i class="fas fa-history"></i> Riwayat
-            </button>
-            <button class="nav-tab" onclick="switchTab('report')">
-                <i class="fas fa-chart-bar"></i> Laporan
-            </button>
-            <button class="nav-tab" onclick="switchTab('report-kehilangan')">
-                <i class="fas fa-exclamation-triangle"></i> Kehilangan
-            </button>
+            <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('input')">✍️ Input Data</button>
+            <button class="nav-tab" onclick="switchTab('history')">📋 Riwayat</button>
+            <button class="nav-tab" onclick="switchTab('report')">📈 Laporan</button>
+            <button class="nav-tab" onclick="switchTab('report-kehilangan')">⚠️ Report Kehilangan</button>
         </div>
 
         <!-- Dashboard Tab -->
@@ -924,54 +698,51 @@
             <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card primary">
-                    <div class="stat-icon"><i class="fas fa-boxes"></i></div>
+                    <div class="stat-icon">📦</div>
                     <div class="stat-value" id="totalItems">0</div>
                     <div class="stat-label">Total Item Tersedia</div>
                 </div>
                 <div class="stat-card success">
-                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-icon">✅</div>
                     <div class="stat-value" id="todayData">0</div>
                     <div class="stat-label">Input Hari Ini</div>
                 </div>
                 <div class="stat-card warning">
-                    <div class="stat-icon"><i class="fas fa-bell"></i></div>
+                    <div class="stat-icon">🔔</div>
                     <div class="stat-value" id="itemCount">0</div>
                     <div class="stat-label">Item Dipilih</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); color: white;">
-                        <i class="fas fa-sync"></i>
-                    </div>
-                    <div class="stat-value" id="syncStatus">Aktif</div>
-                    <div class="stat-label">Status Sinkronisasi</div>
                 </div>
             </div>
 
             <!-- Quick Info Card -->
             <div class="card">
-                <div class="card-header"><i class="fas fa-info-circle"></i> Informasi Cepat</div>
+                <div class="card-header">ℹ️ Informasi Cepat</div>
                 <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>⚠️</span>
                     <span>Pastikan data yang diinput sudah sesuai dengan kondisi fisik barang</span>
                 </div>
                 <div style="display: grid; gap: 1rem; margin-top: 1rem;">
                     <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem;">
-                        <span style="font-weight: 600;"><i class="fas fa-calendar-alt"></i> Tanggal</span>
+                        <span style="font-weight: 600;">📅 Tanggal</span>
                         <span id="currentDate">-</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem;">
-                        <span style="font-weight: 600;"><i class="fas fa-clock"></i> Waktu</span>
+                        <span style="font-weight: 600;">⏰ Waktu</span>
                         <span id="currentTime">-</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem;">
+                        <span style="font-weight: 600;">🔄 Status Sinkronisasi</span>
+                        <span id="syncStatus" class="badge badge-success">Aktif</span>
                     </div>
                 </div>
             </div>
 
             <!-- Recent Activity -->
             <div class="card">
-                <div class="card-header"><i class="fas fa-clock"></i> Aktivitas Terbaru</div>
+                <div class="card-header">🕐 Aktivitas Terbaru</div>
                 <div id="recentActivity">
                     <div class="empty-state">
-                        <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
+                        <div class="empty-state-icon">📭</div>
                         <p>Belum ada aktivitas hari ini</p>
                     </div>
                 </div>
@@ -988,15 +759,15 @@
 
             <!-- Form Input -->
             <div class="card">
-                <div class="card-header"><i class="fas fa-edit"></i> Form Input Data</div>
+                <div class="card-header">📝 Form Input Data</div>
                 
                 <div class="form-group">
-                    <label class="form-label"><i class="fas fa-calendar-alt"></i> Tanggal Rekap</label>
+                    <label class="form-label">📅 Tanggal Rekap</label>
                     <input type="date" class="form-control" id="tanggal" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label"><i class="fas fa-exchange-alt"></i> Shift</label>
+                    <label class="form-label">🔄 Shift</label>
                     <select class="form-select" id="shift" required>
                         <option value="">Pilih Shift</option>
                         <option value="1">Shift 1</option>
@@ -1006,14 +777,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label"><i class="fas fa-user"></i> Nama Kasir</label>
+                    <label class="form-label">👤 Nama Kasir</label>
                     <select class="form-select" id="namaKasir" required>
                         <option value="">Pilih Nama Kasir</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label"><i class="fas fa-box"></i> Pilih Item Barang</label>
+                    <label class="form-label">📦 Pilih Item Barang</label>
                     <select class="form-select" id="itemSelect">
                         <option value="">Pilih Item Barang</option>
                     </select>
@@ -1021,31 +792,34 @@
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        <label class="form-label"><i class="fas fa-clipboard-list"></i> OH (On Hand)</label>
+                        <label class="form-label">📊 OH (On Hand)</label>
                         <input type="number" class="form-control" id="oh" value="0" min="0">
                     </div>
                     <div class="form-group">
-                        <label class="form-label"><i class="fas fa-cube"></i> Fisik</label>
+                        <label class="form-label">📋 Fisik</label>
                         <input type="number" class="form-control" id="fisik" value="0" min="0">
                     </div>
                 </div>
                 
                 <div class="btn-group">
                     <button class="btn btn-primary" id="addItemBtn">
-                        <i class="fas fa-plus"></i> Tambah Item
+                        <i class="fas fa-plus me-1"></i>Tambah Item
                     </button>
                     <button class="btn btn-danger" id="clearBtn">
-                        <i class="fas fa-trash"></i> Hapus Semua
+                        <i class="fas fa-trash me-1"></i>Hapus Semua
+                    </button>
+                    <button class="btn btn-secondary" id="refreshBtn">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
                     </button>
                 </div>
             </div>
 
             <!-- Item Details -->
             <div class="card">
-                <div class="card-header"><i class="fas fa-list"></i> Daftar Item yang Dipilih</div>
+                <div class="card-header">📋 Daftar Item yang Dipilih</div>
                 <div id="itemsTableBody">
                     <div class="empty-state">
-                        <div class="empty-state-icon"><i class="fas fa-box-open"></i></div>
+                        <div class="empty-state-icon">📦</div>
                         <p>Belum ada item yang dipilih</p>
                     </div>
                 </div>
@@ -1054,10 +828,10 @@
             <!-- Action Buttons -->
             <div class="btn-group">
                 <button class="btn btn-success btn-block" onclick="submitData()">
-                    <i class="fas fa-paper-plane"></i> Simpan Data
+                    <i class="fas fa-paper-plane me-2"></i>Simpan Data
                 </button>
                 <button class="btn btn-primary btn-block" id="syncBtn">
-                    <i class="fas fa-sync"></i> Sinkronisasi Data
+                    <i class="fas fa-sync me-2"></i>Sinkronisasi Data
                 </button>
             </div>
         </div>
@@ -1065,10 +839,10 @@
         <!-- History Tab -->
         <div id="history" class="tab-content">
             <div class="card">
-                <div class="card-header"><i class="fas fa-history"></i> Riwayat Input Hari Ini</div>
+                <div class="card-header">📋 Riwayat Input Hari Ini</div>
                 <div id="historyTableBody">
                     <div class="empty-state">
-                        <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
+                        <div class="empty-state-icon">📭</div>
                         <p>Belum ada riwayat input hari ini</p>
                     </div>
                 </div>
@@ -1078,20 +852,18 @@
         <!-- Report Tab -->
         <div id="report" class="tab-content">
             <div class="card">
-                <div class="card-header"><i class="fas fa-chart-bar"></i> Laporan Stock Opname</div>
+                <div class="card-header">📈 Laporan Stock Opname</div>
                 
                 <!-- Filter Options -->
                 <div class="form-group">
-                    <label class="form-label"><i class="fas fa-filter"></i> Filter Periode</label>
+                    <label class="form-label">📅 Filter Periode</label>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                         <input type="date" class="form-control" id="filterStartDate">
                         <input type="date" class="form-control" id="filterEndDate">
                     </div>
                 </div>
 
-                <button class="btn btn-primary btn-block" onclick="generateReport()">
-                    <i class="fas fa-chart-line"></i> Generate Laporan
-                </button>
+                <button class="btn btn-primary btn-block" onclick="generateReport()">📊 Generate Laporan</button>
 
                 <div class="table-container" style="margin-top: 1.5rem;">
                     <table id="reportTable">
@@ -1122,20 +894,18 @@
         <!-- Report Kehilangan Tab -->
         <div id="report-kehilangan" class="tab-content">
             <div class="card">
-                <div class="card-header"><i class="fas fa-exclamation-triangle"></i> Laporan Barang Hilang</div>
+                <div class="card-header">⚠️ Laporan Barang Hilang</div>
                 
                 <!-- Filter Options -->
                 <div class="form-group">
-                    <label class="form-label"><i class="fas fa-filter"></i> Filter Periode</label>
+                    <label class="form-label">📅 Filter Periode</label>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                         <input type="date" class="form-control" id="lossFilterStartDate">
                         <input type="date" class="form-control" id="lossFilterEndDate">
                     </div>
                 </div>
 
-                <button class="btn btn-primary btn-block" onclick="generateLossReport()">
-                    <i class="fas fa-chart-line"></i> Generate Laporan Kehilangan
-                </button>
+                <button class="btn btn-primary btn-block" onclick="generateLossReport()">📊 Generate Laporan Kehilangan</button>
 
                 <!-- Summary Cards -->
                 <div id="lossSummary" class="loss-summary" style="display: none;">
@@ -1156,7 +926,7 @@
                 <!-- Loss Report Content -->
                 <div id="lossReportContent">
                     <div class="empty-state">
-                        <div class="empty-state-icon"><i class="fas fa-chart-pie"></i></div>
+                        <div class="empty-state-icon">📊</div>
                         <p>Pilih periode dan klik "Generate Laporan Kehilangan" untuk menampilkan data barang hilang</p>
                     </div>
                 </div>
@@ -1167,13 +937,6 @@
         <div class="footer">
             <p>© 2024 Rekap SO Rawan Hilang | 2GC6 BAROS PANDEGLANG</p>
             <p>Terintegrasi dengan Google Sheets & WhatsApp Bot | Multi-Input Support</p>
-        </div>
-    </div>
-
-    <!-- Floating Action Button -->
-    <div class="fab-container">
-        <div class="fab" onclick="syncData()">
-            <i class="fas fa-sync"></i>
         </div>
     </div>
 
@@ -1424,7 +1187,7 @@
             if (currentItems.length === 0) {
                 tbody.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon"><i class="fas fa-box-open"></i></div>
+                        <div class="empty-state-icon">📦</div>
                         <p>Belum ada item yang dipilih</p>
                     </div>
                 `;
@@ -1716,7 +1479,7 @@
                     if (Object.keys(groupedData).length === 0) {
                         tbody.innerHTML = `
                             <div class="empty-state">
-                                <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
+                                <div class="empty-state-icon">📭</div>
                                 <p>Belum ada riwayat input hari ini</p>
                             </div>
                         `;
@@ -1738,10 +1501,10 @@
                                 <span class="history-time">${new Date(item.waktu).toLocaleTimeString('id-ID')}</span>
                             </div>
                             <div class="history-details">
-                                <span><i class="fas fa-calendar-alt"></i> ${item.tanggal}</span>
-                                <span><i class="fas fa-exchange-alt"></i> Shift ${item.shift}</span>
-                                <span><i class="fas fa-user"></i> ${item.kasir}</span>
-                                <span><i class="fas fa-box"></i> ${item.count} item</span>
+                                <span>📅 ${item.tanggal}</span>
+                                <span>🔄 Shift ${item.shift}</span>
+                                <span>👤 ${item.kasir}</span>
+                                <span>📦 ${item.count} item</span>
                                 <span class="badge ${item.pengirim === 'Website' ? 'badge-success' : 'badge-primary'}">
                                     ${item.pengirim}
                                 </span>
@@ -1753,7 +1516,7 @@
                 } else {
                     tbody.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
+                            <div class="empty-state-icon">📭</div>
                             <p>Belum ada riwayat input hari ini</p>
                         </div>
                     `;
@@ -1763,7 +1526,7 @@
                 const tbody = document.getElementById('historyTableBody');
                 tbody.innerHTML = `
                     <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle"></i>
+                        <span>❌</span>
                         <span>Gagal memuat riwayat: ${error.message}</span>
                     </div>
                 `;
@@ -1780,7 +1543,7 @@
                 if (!data || data.length < 2) {
                     recentActivity.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
+                            <div class="empty-state-icon">📭</div>
                             <p>Belum ada aktivitas hari ini</p>
                         </div>
                     `;
@@ -1821,7 +1584,7 @@
                 if (Object.keys(groupedData).length === 0) {
                     recentActivity.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
+                            <div class="empty-state-icon">📭</div>
                             <p>Belum ada aktivitas hari ini</p>
                         </div>
                     `;
@@ -1847,8 +1610,8 @@
                             </span>
                         </div>
                         <div class="history-details">
-                            <span><i class="fas fa-clock"></i> ${new Date(item.waktu).toLocaleTimeString('id-ID')}</span>
-                            <span><i class="fas fa-exchange-alt"></i> Shift ${item.shift}</span>
+                            <span>⏰ ${new Date(item.waktu).toLocaleTimeString('id-ID')}</span>
+                            <span>🔄 Shift ${item.shift}</span>
                         </div>
                     `;
                     
@@ -1859,7 +1622,7 @@
                 console.error('Error updating recent activity:', error);
                 recentActivity.innerHTML = `
                     <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle"></i>
+                        <span>❌</span>
                         <span>Gagal memuat aktivitas terbaru</span>
                     </div>
                 `;
@@ -1990,7 +1753,7 @@
                 if (!data || data.length < 2) {
                     content.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon"><i class="fas fa-chart-pie"></i></div>
+                            <div class="empty-state-icon">📊</div>
                             <p>Tidak ada data untuk ditampilkan</p>
                         </div>
                     `;
@@ -2021,7 +1784,7 @@
                 if (filteredData.length === 0) {
                     content.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="empty-state-icon">✅</div>
                             <p>Tidak ada barang hilang untuk periode yang dipilih</p>
                             <p style="margin-top: 0.5rem; font-size: 0.9rem;">Selamat! Semua stok tercatat dengan baik.</p>
                         </div>
@@ -2058,7 +1821,7 @@
                 document.getElementById('totalLossValue').textContent = totalLossValue;
                 document.getElementById('totalLossItems').textContent = totalLossItems;
                 document.getElementById('avgLossValue').textContent = avgLossValue;
-                document.getElementById('lossSummary').style.display = 'grid';
+                document.getElementById('lossSummary').style.display = 'flex';
 
                 // Generate loss report content
                 let lossContent = '';
@@ -2084,26 +1847,26 @@
                             </div>
                             <div class="loss-details">
                                 <div>
-                                    <strong><i class="fas fa-calendar-alt"></i> Tanggal:</strong> ${row[tanggalCol]}
+                                    <strong>Tanggal:</strong> ${row[tanggalCol]}
                                 </div>
                                 <div>
-                                    <strong><i class="fas fa-exchange-alt"></i> Shift:</strong> ${row[shiftCol]}
+                                    <strong>Shift:</strong> ${row[shiftCol]}
                                 </div>
                                 <div>
-                                    <strong><i class="fas fa-user"></i> Kasir:</strong> ${row[namaCol]}
+                                    <strong>Kasir:</strong> ${row[namaCol]}
                                 </div>
                                 <div>
-                                    <strong><i class="fas fa-clipboard-list"></i> OH:</strong> ${row[ohCol]}
+                                    <strong>OH:</strong> ${row[ohCol]}
                                 </div>
                                 <div>
-                                    <strong><i class="fas fa-cube"></i> Fisik:</strong> ${row[fisikCol]}
+                                    <strong>Fisik:</strong> ${row[fisikCol]}
                                 </div>
                                 <div>
-                                    <strong><i class="fas fa-calculator"></i> Selisih:</strong> <span class="selisih-negative">${selisih}</span>
+                                    <strong>Selisih:</strong> <span class="selisih-negative">${selisih}</span>
                                 </div>
                             </div>
                             <div class="loss-comment">
-                                <strong><i class="fas fa-comment-alt"></i> Analisis:</strong> ${comment}
+                                <strong>📝 Analisis:</strong> ${comment}
                             </div>
                         </div>
                     `;
@@ -2175,6 +1938,13 @@
             // Event listeners
             document.getElementById('addItemBtn').addEventListener('click', addItemToTable);
             document.getElementById('clearBtn').addEventListener('click', clearAllItems);
+            document.getElementById('refreshBtn').addEventListener('click', function() {
+                loadListItems();
+                loadKasirList();
+                loadHistory();
+                updateRecentActivity();
+                updateDashboardStats();
+            });
             document.getElementById('syncBtn').addEventListener('click', syncData);
         });
     </script>
