@@ -367,28 +367,6 @@
             font-size: 0.875rem;
         }
 
-        /* Loading Spinner */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .spinner {
-            border: 4px solid var(--border-color);
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            width: 3rem;
-            height: 3rem;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         /* Alert */
         .alert {
             padding: 1rem 1.25rem;
@@ -673,9 +651,431 @@
         .summary-avg {
             color: #10b981;
         }
+
+        /* ====== LOADING STYLES YANG DIPERBAIKI ====== */
+        /* Loading Overlay Modern */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Modern Loading Container */
+        .loading-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+            width: 90%;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        /* Neon Spinner */
+        .neon-spinner {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 25px;
+            position: relative;
+        }
+
+        .neon-spinner:before,
+        .neon-spinner:after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .neon-spinner:before {
+            border-top: 4px solid #6366f1;
+            border-right: 4px solid #6366f1;
+            animation: neonSpin 1.2s linear infinite;
+            filter: drop-shadow(0 0 8px #6366f1);
+        }
+
+        .neon-spinner:after {
+            border-bottom: 4px solid #8b5cf6;
+            border-left: 4px solid #8b5cf6;
+            animation: neonSpinReverse 1.5s linear infinite;
+            filter: drop-shadow(0 0 8px #8b5cf6);
+        }
+
+        /* Pulse Effect */
+        .pulse-effect {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 50%;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        /* Loading Text */
+        .loading-text {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .loading-subtext {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.4),
+                transparent
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        /* Loading Dots Animation */
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 15px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) {
+            animation-delay: -0.32s;
+            background: #6366f1;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: -0.16s;
+            background: #8b5cf6;
+        }
+
+        .dot:nth-child(3) {
+            background: #a78bfa;
+        }
+
+        /* Animations */
+        @keyframes neonSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes neonSpinReverse {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Loading States */
+        .loading-state {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading-state.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Small Loading (untuk button/elemen kecil) */
+        .small-loading {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-color);
+        }
+
+        .small-loading.active {
+            display: inline-flex;
+        }
+
+        .small-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: var(--primary-color);
+            border-right-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Success/Error States untuk Loading */
+        .loading-success {
+            color: #10b981;
+            animation: successPulse 0.5s ease;
+        }
+
+        .loading-error {
+            color: #ef4444;
+            animation: errorShake 0.5s ease;
+        }
+
+        @keyframes successPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Skeleton Loading */
+        .skeleton-loading {
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.1) 25%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0.1) 75%
+            );
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.5s infinite;
+            border-radius: 8px;
+            min-height: 20px;
+        }
+
+        @keyframes skeletonShimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Toast Notifications */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            max-width: 400px;
+            min-width: 300px;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .toast-success {
+            border-left: 4px solid #10b981;
+        }
+        
+        .toast-error {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .toast-warning {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .toast-info {
+            border-left: 4px solid #6366f1;
+        }
+        
+        .toast-success i {
+            color: #10b981;
+        }
+        
+        .toast-error i {
+            color: #ef4444;
+        }
+        
+        .toast-warning i {
+            color: #f59e0b;
+        }
+        
+        .toast-info i {
+            color: #6366f1;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .toast-close:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        /* Spinner untuk tab content lama (untuk kompatibilitas) */
+        .spinner {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="globalLoading">
+        <div class="loading-container">
+            <div class="neon-spinner">
+                <div class="pulse-effect"></div>
+            </div>
+            
+            <div class="loading-text" id="loadingMessage">Memproses Data</div>
+            <div class="loading-subtext" id="loadingSubtext">Mohon tunggu sebentar...</div>
+            
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="loadingProgress"></div>
+            </div>
+            
+            <div class="loading-subtext" id="loadingPercentage">0%</div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -751,14 +1151,15 @@
 
         <!-- Input Data Tab -->
         <div id="input" class="tab-content">
-            <!-- Loading Indicator -->
-            <div class="loading" id="loadingIndicator">
-                <div class="spinner"></div>
-                <p>Memuat data...</p>
+            <!-- Loading State -->
+            <div class="loading-state" id="tabLoading">
+                <div class="skeleton-loading" style="height: 60px; margin-bottom: 20px;"></div>
+                <div class="skeleton-loading" style="height: 100px; margin-bottom: 20px;"></div>
+                <div class="skeleton-loading" style="height: 150px;"></div>
             </div>
 
             <!-- Form Input -->
-            <div class="card">
+            <div class="card" id="inputForm" style="display: none;">
                 <div class="card-header">📝 Form Input Data</div>
                 
                 <div class="form-group">
@@ -815,7 +1216,7 @@
             </div>
 
             <!-- Item Details -->
-            <div class="card">
+            <div class="card" id="itemDetails" style="display: none; margin-top: 20px;">
                 <div class="card-header">📋 Daftar Item yang Dipilih</div>
                 <div id="itemsTableBody">
                     <div class="empty-state">
@@ -826,7 +1227,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="btn-group">
+            <div class="btn-group" id="actionButtons" style="display: none;">
                 <button class="btn btn-success btn-block" onclick="submitData()">
                     <i class="fas fa-paper-plane me-2"></i>Simpan Data
                 </button>
@@ -841,9 +1242,10 @@
             <div class="card">
                 <div class="card-header">📋 Riwayat Input Hari Ini</div>
                 <div id="historyTableBody">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <p>Belum ada riwayat input hari ini</p>
+                    <div class="loading-state" id="historyLoading">
+                        <div class="skeleton-loading" style="height: 80px; margin-bottom: 15px;"></div>
+                        <div class="skeleton-loading" style="height: 80px; margin-bottom: 15px;"></div>
+                        <div class="skeleton-loading" style="height: 80px;"></div>
                     </div>
                 </div>
             </div>
@@ -863,10 +1265,22 @@
                     </div>
                 </div>
 
-                <button class="btn btn-primary btn-block" onclick="generateReport()">📊 Generate Laporan</button>
+                <button class="btn btn-primary btn-block" onclick="generateReport()" id="generateReportBtn">
+                    <span class="btn-text">📊 Generate Laporan</span>
+                    <span class="small-loading" id="reportLoading">
+                        <div class="small-spinner"></div>
+                        Memproses...
+                    </span>
+                </button>
 
                 <div class="table-container" style="margin-top: 1.5rem;">
-                    <table id="reportTable">
+                    <div class="loading-state" id="reportTableLoading">
+                        <div class="skeleton-loading" style="height: 40px; margin-bottom: 10px;"></div>
+                        <div class="skeleton-loading" style="height: 30px; margin-bottom: 10px;"></div>
+                        <div class="skeleton-loading" style="height: 30px; margin-bottom: 10px;"></div>
+                        <div class="skeleton-loading" style="height: 30px;"></div>
+                    </div>
+                    <table id="reportTable" style="display: none;">
                         <thead>
                             <tr>
                                 <th>Tanggal</th>
@@ -880,11 +1294,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td colspan="8" style="text-align: center; color: var(--text-secondary);">
-                                    Klik "Generate Laporan" untuk menampilkan data
-                                </td>
-                            </tr>
+                            <!-- Data akan dimasukkan di sini -->
                         </tbody>
                     </table>
                 </div>
@@ -905,7 +1315,13 @@
                     </div>
                 </div>
 
-                <button class="btn btn-primary btn-block" onclick="generateLossReport()">📊 Generate Laporan Kehilangan</button>
+                <button class="btn btn-primary btn-block" onclick="generateLossReport()" id="generateLossReportBtn">
+                    <span class="btn-text">📊 Generate Laporan Kehilangan</span>
+                    <span class="small-loading" id="lossReportLoading">
+                        <div class="small-spinner"></div>
+                        Memproses...
+                    </span>
+                </button>
 
                 <!-- Summary Cards -->
                 <div id="lossSummary" class="loss-summary" style="display: none;">
@@ -925,9 +1341,9 @@
 
                 <!-- Loss Report Content -->
                 <div id="lossReportContent">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📊</div>
-                        <p>Pilih periode dan klik "Generate Laporan Kehilangan" untuk menampilkan data barang hilang</p>
+                    <div class="loading-state" id="lossReportLoadingState">
+                        <div class="skeleton-loading" style="height: 100px; margin-bottom: 15px;"></div>
+                        <div class="skeleton-loading" style="height: 100px;"></div>
                     </div>
                 </div>
             </div>
@@ -954,6 +1370,126 @@
         let kasirList = [];
         let currentItems = [];
         let historyData = [];
+        
+        // ====== FUNGSI LOADING YANG DIPERBAIKI ======
+        
+        // Fungsi untuk menampilkan loading overlay
+        function showLoading(message = 'Memproses Data', submessage = 'Mohon tunggu sebentar...') {
+            const loadingOverlay = document.getElementById('globalLoading');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const loadingSubtext = document.getElementById('loadingSubtext');
+            const loadingProgress = document.getElementById('loadingProgress');
+            const loadingPercentage = document.getElementById('loadingPercentage');
+            
+            loadingMessage.textContent = message;
+            loadingSubtext.textContent = submessage;
+            loadingProgress.style.width = '0%';
+            loadingPercentage.textContent = '0%';
+            
+            // Reset animasi
+            loadingOverlay.classList.remove('active');
+            void loadingOverlay.offsetWidth; // Trigger reflow
+            loadingOverlay.classList.add('active');
+            
+            // Blok scroll
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Fungsi untuk memperbarui progress loading
+        function updateLoadingProgress(progress, message = null) {
+            const loadingProgress = document.getElementById('loadingProgress');
+            const loadingPercentage = document.getElementById('loadingPercentage');
+            const loadingMessage = document.getElementById('loadingMessage');
+            
+            if (message) {
+                loadingMessage.textContent = message;
+            }
+            
+            const progressValue = Math.min(Math.max(progress, 0), 100);
+            loadingProgress.style.width = `${progressValue}%`;
+            loadingPercentage.textContent = `${Math.round(progressValue)}%`;
+            
+            // Tambahkan efek sukses jika mencapai 100%
+            if (progressValue >= 100) {
+                setTimeout(() => {
+                    loadingMessage.classList.add('loading-success');
+                    loadingMessage.textContent = 'Selesai!';
+                }, 300);
+            }
+        }
+        
+        // Fungsi untuk menyembunyikan loading overlay
+        function hideLoading() {
+            const loadingOverlay = document.getElementById('globalLoading');
+            const loadingMessage = document.getElementById('loadingMessage');
+            
+            // Reset status sukses/error
+            loadingMessage.classList.remove('loading-success', 'loading-error');
+            
+            // Tunggu sedikit untuk animasi selesai
+            setTimeout(() => {
+                loadingOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }, 500);
+        }
+        
+        // Fungsi untuk menampilkan loading error
+        function showLoadingError(errorMessage) {
+            const loadingMessage = document.getElementById('loadingMessage');
+            const loadingSubtext = document.getElementById('loadingSubtext');
+            
+            loadingMessage.classList.add('loading-error');
+            loadingMessage.textContent = 'Terjadi Kesalahan!';
+            loadingSubtext.textContent = errorMessage;
+            
+            // Auto hide setelah 3 detik
+            setTimeout(() => {
+                hideLoading();
+            }, 3000);
+        }
+        
+        // Fungsi untuk menampilkan loading button
+        function showButtonLoading(buttonId, isLoading) {
+            const button = document.getElementById(buttonId);
+            const btnText = button.querySelector('.btn-text');
+            const loadingElement = button.querySelector('.small-loading');
+            
+            if (isLoading) {
+                btnText.style.display = 'none';
+                loadingElement.classList.add('active');
+                button.disabled = true;
+            } else {
+                btnText.style.display = 'inline';
+                loadingElement.classList.remove('active');
+                button.disabled = false;
+            }
+        }
+        
+        // Fungsi untuk menampilkan skeleton loading
+        function showSkeletonLoading(elementId, show) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.classList.toggle('active', show);
+            }
+        }
+        
+        // Fungsi untuk menyembunyikan konten dan menampilkan skeleton
+        function showContentWithLoading(contentId, skeletonId, showContent) {
+            const content = document.getElementById(contentId);
+            const skeleton = document.getElementById(skeletonId);
+            
+            if (content && skeleton) {
+                if (showContent) {
+                    skeleton.classList.remove('active');
+                    content.style.display = 'block';
+                } else {
+                    content.style.display = 'none';
+                    skeleton.classList.add('active');
+                }
+            }
+        }
+        
+        // ====== FUNGSI LAINNYA ======
         
         // Fungsi generateUniqueId - SAMA DENGAN BOT WHATSAPP
         function generateUniqueId(...args) {
@@ -987,7 +1523,6 @@
                     const day = String(dateObj.getDate()).padStart(2, '0');
                     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                     const year = dateObj.getFullYear();
-                    // PERBAIKAN: Tambahkan kutip di depan tanggal
                     return `'${day}-${month}-${year}`;
                 }
                 
@@ -1013,7 +1548,7 @@
                 return data.values || [];
             } catch (error) {
                 console.error(`Error fetching data from ${sheetName}:`, error);
-                showError(`Gagal mengambil data dari ${sheetName}: ${error.message}`);
+                showLoadingError(`Gagal mengambil data dari ${sheetName}`);
                 return [];
             }
         }
@@ -1073,9 +1608,10 @@
             }
         }
         
-        // Fungsi untuk memuat data item dari worksheet List_so
+        // Fungsi untuk memuat data item dari worksheet List_so (DIPERBAIKI)
         async function loadListItems() {
-            showLoading();
+            updateLoadingProgress(10, 'Memuat data item...');
+            
             const data = await fetchSheetData(LIST_SO_SHEET);
             
             if (data && data.length > 0) {
@@ -1086,26 +1622,26 @@
                 
                 updateItemSelect();
                 updateTotalItems();
-                hideLoading();
+                updateLoadingProgress(30);
             } else {
                 console.error('Tidak ada data item ditemukan atau data kosong');
-                showError('Tidak ada data item ditemukan');
-                hideLoading();
+                showLoadingError('Tidak ada data item ditemukan');
             }
         }
         
-        // Fungsi untuk memuat data kasir dari worksheet Absensi
+        // Fungsi untuk memuat data kasir dari worksheet Absensi (DIPERBAIKI)
         async function loadKasirList() {
+            updateLoadingProgress(40, 'Memuat data kasir...');
+            
             const data = await fetchSheetData(ABSENSI_SHEET);
             
             if (data && data.length > 0) {
-                // Mengambil kolom NAMA (indeks 1) dari worksheet Absensi
                 kasirList = [...new Set(data.slice(1).map(row => row[1] || '').filter(name => name))];
-                
                 updateKasirSelect();
+                updateLoadingProgress(60);
             } else {
                 console.error('Tidak ada data kasir ditemukan');
-                showError('Tidak ada data kasir ditemukan');
+                showLoadingError('Tidak ada data kasir ditemukan');
             }
         }
         
@@ -1142,12 +1678,12 @@
             const fisikInput = document.getElementById('fisik');
             
             if (itemSelect.value === '') {
-                alert('Pilih item terlebih dahulu!');
+                showToast('Pilih item terlebih dahulu!', 'warning');
                 return;
             }
             
             if (ohInput.value === '' || fisikInput.value === '') {
-                alert('Isi OH dan Fisik terlebih dahulu!');
+                showToast('Isi OH dan Fisik terlebih dahulu!', 'warning');
                 return;
             }
             
@@ -1163,6 +1699,7 @@
                 currentItems[existingIndex].oh = oh;
                 currentItems[existingIndex].fisik = fisik;
                 currentItems[existingIndex].selisih = selisih;
+                showToast('Item diperbarui!', 'success');
             } else {
                 currentItems.push({
                     plu: selectedItem.plu,
@@ -1171,6 +1708,7 @@
                     fisik: fisik,
                     selisih: selisih
                 });
+                showToast('Item ditambahkan!', 'success');
             }
             
             updateItemsTable();
@@ -1255,8 +1793,11 @@
         
         // Fungsi untuk menghapus item dari tabel
         function removeItem(index) {
-            currentItems.splice(index, 1);
-            updateItemsTable();
+            if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
+                currentItems.splice(index, 1);
+                updateItemsTable();
+                showToast('Item dihapus!', 'success');
+            }
         }
         
         // Fungsi untuk menghapus semua item
@@ -1264,27 +1805,13 @@
             if (confirm('Apakah Anda yakin ingin menghapus semua item?')) {
                 currentItems = [];
                 updateItemsTable();
+                showToast('Semua item dihapus!', 'success');
             }
         }
         
         // Fungsi untuk memperbarui statistik
         function updateTotalItems() {
             document.getElementById('totalItems').textContent = listItems.length;
-        }
-        
-        // Fungsi untuk menampilkan loading
-        function showLoading() {
-            document.getElementById('loadingIndicator').style.display = 'block';
-        }
-        
-        // Fungsi untuk menyembunyikan loading
-        function hideLoading() {
-            document.getElementById('loadingIndicator').style.display = 'none';
-        }
-
-        // Fungsi untuk menampilkan error
-        function showError(message) {
-            alert(`Error: ${message}`);
         }
         
         // Fungsi untuk mencari data existing di SoRawan worksheet
@@ -1319,10 +1846,10 @@
             }
         }
         
-        // Fungsi untuk mengirim data ke Google Sheets
+        // Fungsi untuk mengirim data ke Google Sheets (DIPERBAIKI)
         async function submitData() {
             if (currentItems.length === 0) {
-                alert('Tidak ada item yang ditambahkan!');
+                showToast('Tidak ada item yang ditambahkan!', 'warning');
                 return;
             }
             
@@ -1331,21 +1858,26 @@
             const namaKasir = document.getElementById('namaKasir').value;
             
             if (!tanggal || !shift || !namaKasir) {
-                alert('Harap lengkapi semua field!');
+                showToast('Harap lengkapi semua field!', 'warning');
                 return;
             }
             
-            showLoading();
+            showLoading('Menyimpan Data', 'Sedang menyimpan ke server...');
+            updateLoadingProgress(20);
             
             try {
                 const formattedDate = standardizeDateFormat(tanggal);
                 
                 let successCount = 0;
                 let updateCount = 0;
+                const totalItems = currentItems.length;
                 
-                for (const item of currentItems) {
+                for (let i = 0; i < currentItems.length; i++) {
+                    const item = currentItems[i];
                     const uniqueId = generateUniqueId(namaKasir, shift, formattedDate, item.plu);
                     const timestamp = new Date().toISOString();
+                    
+                    updateLoadingProgress(20 + ((i + 1) / totalItems * 60), `Menyimpan item ${i + 1} dari ${totalItems}`);
                     
                     const existingData = await findExistingData(namaKasir, shift, formattedDate, item.plu);
                     
@@ -1373,6 +1905,8 @@
                     }
                 }
                 
+                updateLoadingProgress(90, 'Menyelesaikan proses...');
+                
                 let message = `Data berhasil disimpan!`;
                 if (successCount > 0) {
                     message += ` ${successCount} item baru ditambahkan.`;
@@ -1381,8 +1915,13 @@
                     message += ` ${updateCount} item diperbarui.`;
                 }
                 
-                alert(message);
+                updateLoadingProgress(100);
+                setTimeout(() => {
+                    hideLoading();
+                    showToast(message, 'success', 5000);
+                }, 1000);
                 
+                // Reset form
                 document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
                 document.getElementById('shift').value = '';
                 document.getElementById('namaKasir').value = '';
@@ -1390,15 +1929,15 @@
                 updateItemsTable();
                 
                 // Memperbarui data di semua tab setelah submit
-                await loadHistory();
-                await updateRecentActivity();
-                updateDashboardStats();
+                setTimeout(async () => {
+                    await loadHistory();
+                    await updateRecentActivity();
+                    updateDashboardStats();
+                }, 1500);
                 
             } catch (error) {
                 console.error('Error submitting data:', error);
-                alert('Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
-            } finally {
-                hideLoading();
+                showLoadingError('Terjadi kesalahan saat menyimpan data.');
             }
         }
         
@@ -1437,15 +1976,16 @@
             }
         }
         
-        // Fungsi untuk memuat riwayat input hari ini
+        // Fungsi untuk memuat riwayat input hari ini (DIPERBAIKI)
         async function loadHistory() {
+            showSkeletonLoading('historyLoading', true);
+            
             const today = new Date();
             const formattedToday = standardizeDateFormat(today.toISOString().split('T')[0]);
             
             try {
                 const data = await fetchSheetData(SO_RAWAN_SHEET);
                 const tbody = document.getElementById('historyTableBody');
-                tbody.innerHTML = '';
                 
                 if (data && data.length > 0) {
                     const headers = data[0];
@@ -1483,6 +2023,7 @@
                                 <p>Belum ada riwayat input hari ini</p>
                             </div>
                         `;
+                        showSkeletonLoading('historyLoading', false);
                         return;
                     }
                     
@@ -1491,28 +2032,28 @@
                         new Date(b.waktu) - new Date(a.waktu)
                     );
                     
+                    let rows = '';
                     sortedData.forEach(item => {
-                        const row = document.createElement('div');
-                        row.className = 'history-item';
-                        
-                        row.innerHTML = `
-                            <div class="history-header">
-                                <span class="history-title">Input oleh ${item.kasir}</span>
-                                <span class="history-time">${new Date(item.waktu).toLocaleTimeString('id-ID')}</span>
-                            </div>
-                            <div class="history-details">
-                                <span>📅 ${item.tanggal}</span>
-                                <span>🔄 Shift ${item.shift}</span>
-                                <span>👤 ${item.kasir}</span>
-                                <span>📦 ${item.count} item</span>
-                                <span class="badge ${item.pengirim === 'Website' ? 'badge-success' : 'badge-primary'}">
-                                    ${item.pengirim}
-                                </span>
+                        rows += `
+                            <div class="history-item">
+                                <div class="history-header">
+                                    <span class="history-title">Input oleh ${item.kasir}</span>
+                                    <span class="history-time">${new Date(item.waktu).toLocaleTimeString('id-ID')}</span>
+                                </div>
+                                <div class="history-details">
+                                    <span>📅 ${item.tanggal}</span>
+                                    <span>🔄 Shift ${item.shift}</span>
+                                    <span>👤 ${item.kasir}</span>
+                                    <span>📦 ${item.count} item</span>
+                                    <span class="badge ${item.pengirim === 'Website' ? 'badge-success' : 'badge-primary'}">
+                                        ${item.pengirim}
+                                    </span>
+                                </div>
                             </div>
                         `;
-                        
-                        tbody.appendChild(row);
                     });
+                    
+                    tbody.innerHTML = rows;
                 } else {
                     tbody.innerHTML = `
                         <div class="empty-state">
@@ -1530,6 +2071,8 @@
                         <span>Gagal memuat riwayat: ${error.message}</span>
                     </div>
                 `;
+            } finally {
+                showSkeletonLoading('historyLoading', false);
             }
         }
         
@@ -1629,35 +2172,47 @@
             }
         }
 
-        // Fungsi untuk sinkronisasi data
+        // Fungsi untuk sinkronisasi data (DIPERBAIKI)
         async function syncData() {
-            showLoading();
+            showLoading('Sinkronisasi Data', 'Menyinkronkan dengan server...');
+            updateLoadingProgress(10);
+            
             try {
                 await loadListItems();
+                updateLoadingProgress(50, 'Mengambil data kasir...');
                 await loadKasirList();
+                updateLoadingProgress(70, 'Memperbarui riwayat...');
                 await loadHistory();
+                updateLoadingProgress(85, 'Memperbarui aktivitas...');
                 await updateRecentActivity();
+                updateLoadingProgress(95, 'Memperbarui statistik...');
                 await updateDashboardStats();
-                alert('Data berhasil disinkronisasi!');
+                updateLoadingProgress(100);
+                
+                setTimeout(() => {
+                    hideLoading();
+                    showToast('Data berhasil disinkronisasi!', 'success');
+                }, 1000);
+                
             } catch (error) {
                 console.error('Error syncing data:', error);
-                alert('Terjadi kesalahan saat sinkronisasi data.');
-            } finally {
-                hideLoading();
+                showLoadingError('Terjadi kesalahan saat sinkronisasi data.');
             }
         }
         
-        // Fungsi untuk generate laporan
+        // Fungsi untuk generate laporan (DIPERBAIKI)
         async function generateReport() {
             const startDate = document.getElementById('filterStartDate').value;
             const endDate = document.getElementById('filterEndDate').value;
 
             if (!startDate || !endDate) {
-                alert('⚠️ Pilih periode tanggal terlebih dahulu!');
+                showToast('Pilih periode tanggal terlebih dahulu!', 'warning');
                 return;
             }
 
-            showLoading();
+            showButtonLoading('generateReportBtn', true);
+            showSkeletonLoading('reportTableLoading', true);
+            document.getElementById('reportTable').style.display = 'none';
             
             try {
                 const data = await fetchSheetData(SO_RAWAN_SHEET);
@@ -1671,7 +2226,9 @@
                             </td>
                         </tr>
                     `;
-                    hideLoading();
+                    document.getElementById('reportTable').style.display = 'table';
+                    showSkeletonLoading('reportTableLoading', false);
+                    showButtonLoading('generateReportBtn', false);
                     return;
                 }
 
@@ -1701,7 +2258,9 @@
                             </td>
                         </tr>
                     `;
-                    hideLoading();
+                    document.getElementById('reportTable').style.display = 'table';
+                    showSkeletonLoading('reportTableLoading', false);
+                    showButtonLoading('generateReportBtn', false);
                     return;
                 }
 
@@ -1726,25 +2285,32 @@
                 });
 
                 tbody.innerHTML = rows;
+                document.getElementById('reportTable').style.display = 'table';
+                showSkeletonLoading('reportTableLoading', false);
+                showButtonLoading('generateReportBtn', false);
+                showToast('Laporan berhasil dibuat!', 'success');
+                
             } catch (error) {
                 console.error('Error generating report:', error);
-                alert('Terjadi kesalahan saat membuat laporan.');
-            } finally {
-                hideLoading();
+                showToast('Terjadi kesalahan saat membuat laporan.', 'error');
+                showButtonLoading('generateReportBtn', false);
+                showSkeletonLoading('reportTableLoading', false);
             }
         }
         
-        // Fungsi untuk generate laporan kehilangan - DIPERBAIKI
+        // Fungsi untuk generate laporan kehilangan (DIPERBAIKI)
         async function generateLossReport() {
             const startDate = document.getElementById('lossFilterStartDate').value;
             const endDate = document.getElementById('lossFilterEndDate').value;
 
             if (!startDate || !endDate) {
-                alert('⚠️ Pilih periode tanggal terlebih dahulu!');
+                showToast('Pilih periode tanggal terlebih dahulu!', 'warning');
                 return;
             }
 
-            showLoading();
+            showButtonLoading('generateLossReportBtn', true);
+            showSkeletonLoading('lossReportLoadingState', true);
+            document.getElementById('lossReportContent').innerHTML = '';
             
             try {
                 const data = await fetchSheetData(SO_RAWAN_SHEET);
@@ -1757,7 +2323,8 @@
                             <p>Tidak ada data untuk ditampilkan</p>
                         </div>
                     `;
-                    hideLoading();
+                    showSkeletonLoading('lossReportLoadingState', false);
+                    showButtonLoading('generateLossReportBtn', false);
                     return;
                 }
 
@@ -1790,17 +2357,16 @@
                         </div>
                     `;
                     document.getElementById('lossSummary').style.display = 'none';
-                    hideLoading();
+                    showSkeletonLoading('lossReportLoadingState', false);
+                    showButtonLoading('generateLossReportBtn', false);
                     return;
                 }
 
-                // PERBAIKAN 1 & 2: Urutkan data berdasarkan nama barang, kemudian tanggal
+                // Urutkan data berdasarkan nama barang, kemudian tanggal
                 filteredData.sort((a, b) => {
-                    // Urutkan berdasarkan nama barang
                     const namaCompare = (a[namaBarangCol] || '').localeCompare(b[namaBarangCol] || '');
                     if (namaCompare !== 0) return namaCompare;
                     
-                    // Jika nama barang sama, urutkan berdasarkan tanggal
                     const dateA = new Date(standardizeDateFormat(a[tanggalCol])).getTime();
                     const dateB = new Date(standardizeDateFormat(b[tanggalCol])).getTime();
                     return dateA - dateB;
@@ -1838,7 +2404,6 @@
                         comment = 'Kehilangan signifikan. Perlu investigasi mendalam untuk mengetahui penyebab kehilangan.';
                     }
                     
-                    // PERBAIKAN 1: Ganti "unit" menjadi "pcs"
                     lossContent += `
                         <div class="loss-card">
                             <div class="loss-header">
@@ -1873,11 +2438,15 @@
                 });
 
                 content.innerHTML = lossContent;
+                showSkeletonLoading('lossReportLoadingState', false);
+                showButtonLoading('generateLossReportBtn', false);
+                showToast('Laporan kehilangan berhasil dibuat!', 'success');
+                
             } catch (error) {
                 console.error('Error generating loss report:', error);
-                alert('Terjadi kesalahan saat membuat laporan kehilangan.');
-            } finally {
-                hideLoading();
+                showToast('Terjadi kesalahan saat membuat laporan kehilangan.', 'error');
+                showButtonLoading('generateLossReportBtn', false);
+                showSkeletonLoading('lossReportLoadingState', false);
             }
         }
         
@@ -1919,6 +2488,41 @@
             document.getElementById('currentTime').textContent = now.toLocaleTimeString('id-ID', timeOptions);
         }
         
+        // Fungsi untuk menampilkan toast notification
+        function showToast(message, type = 'info', duration = 3000) {
+            // Hapus toast sebelumnya jika ada
+            const existingToast = document.querySelector('.toast-notification');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove setelah duration
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => {
+                        if (toast.parentElement) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }
+            }, duration);
+        }
+        
         // Inisialisasi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', function() {
             const today = new Date().toISOString().split('T')[0];
@@ -1932,20 +2536,70 @@
             updateDateTime();
             setInterval(updateDateTime, 1000);
             
-            // Load data saat halaman pertama kali dibuka
-            syncData();
-            
             // Event listeners
             document.getElementById('addItemBtn').addEventListener('click', addItemToTable);
             document.getElementById('clearBtn').addEventListener('click', clearAllItems);
             document.getElementById('refreshBtn').addEventListener('click', function() {
-                loadListItems();
-                loadKasirList();
-                loadHistory();
-                updateRecentActivity();
-                updateDashboardStats();
+                showLoading('Memperbarui Data', 'Mengambil data terbaru...');
+                updateLoadingProgress(30);
+                
+                setTimeout(async () => {
+                    await loadListItems();
+                    updateLoadingProgress(60);
+                    await loadKasirList();
+                    updateLoadingProgress(80);
+                    await loadHistory();
+                    updateLoadingProgress(90);
+                    await updateRecentActivity();
+                    updateLoadingProgress(95);
+                    await updateDashboardStats();
+                    updateLoadingProgress(100);
+                    
+                    setTimeout(() => {
+                        hideLoading();
+                        showToast('Data berhasil diperbarui!', 'success');
+                    }, 500);
+                }, 500);
             });
             document.getElementById('syncBtn').addEventListener('click', syncData);
+            
+            // Load data saat halaman pertama kali dibuka dengan efek yang keren
+            setTimeout(async () => {
+                showLoading('Menyiapkan Aplikasi', 'Memuat data awal...');
+                updateLoadingProgress(20);
+                
+                try {
+                    await loadListItems();
+                    updateLoadingProgress(40);
+                    await loadKasirList();
+                    updateLoadingProgress(60);
+                    await loadHistory();
+                    updateLoadingProgress(75);
+                    await updateRecentActivity();
+                    updateLoadingProgress(85);
+                    await updateDashboardStats();
+                    updateLoadingProgress(95);
+                    
+                    // Tampilkan form setelah semua data dimuat
+                    setTimeout(() => {
+                        document.getElementById('inputForm').style.display = 'block';
+                        document.getElementById('itemDetails').style.display = 'block';
+                        document.getElementById('actionButtons').style.display = 'flex';
+                        document.getElementById('tabLoading').style.display = 'none';
+                        
+                        updateLoadingProgress(100, 'Siap digunakan!');
+                        
+                        setTimeout(() => {
+                            hideLoading();
+                            showToast('Aplikasi siap digunakan!', 'success', 2000);
+                        }, 1000);
+                    }, 300);
+                    
+                } catch (error) {
+                    console.error('Error initializing app:', error);
+                    showLoadingError('Gagal memuat data awal');
+                }
+            }, 1000);
         });
     </script>
 </body>
